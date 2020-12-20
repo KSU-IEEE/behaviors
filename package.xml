@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+    <!-- required tags -->
+    <name>behaviors</name>
+    <version>1.0.0</version>
+    <description>
+        This package holds all behaviors needed to run the autonomy.
+        version 1.* will be for the Pac-man bot 
+    </description>
+    <maintainer email="tstanca@students.kennesaw.edu">Trevor Stanca</maintainer>
+    <license>This was just required for compilation</license>
+
+    <!-- dependencies -->
+    <buildtool_depend>catkin</buildtool_depend>
+    <exec_depend>roscpp</exec_depend>
+    <exec_depend>std_msgs</exec_depend>
+
+    <build_depend>message_generation</build_depend>
+
+    <exec_depend>message_runtime</exec_depend>
+    <exec_depend>rospy</exec_depend>
+</package>
