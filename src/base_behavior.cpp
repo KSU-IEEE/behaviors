@@ -26,32 +26,20 @@ bool base_behavior::in_control() {
 
 void base_behavior::activate_cb(const std_msgs::Bool::ConstPtr& activate) {
     in_control_ = activate->data;
+    while(in_control_)control_loop();
 }
 
-// to be called by each rosnode. set beh to the new behavior class 
-// the MUST inherit from base_behavior
-template<class beh>
-int main(int argc, char* argv[])
-{
-    // initialize class 
-    beh beh_ = new beh();
-    // This must be called before anything else ROS-related
-    ros::init(argc, argv, beh_.node_name());
-
+void base_behavior::onInit() {
     // Create a ROS node handle
     ros::NodeHandle nh;
-    beh_.set_nh(nh);
+    set_nh(nh);
     
     // initialize subscribers && grab params from launch files
-    beh_.init();
-    beh_.set_params();
+    nodelet_init();
+    set_params();
 
     // setup route to activate with sm 
-    string topic_name = beh_.node_name() + "/activate";
-    ros::Subscriber sm_sub = nh.subscribe(topic_name, 1000, beh_.activate_cb);
-
-    while(nh.ok()) {
-        if (beh_.in_control()) beh_.control_loop();
-    }
+    string topic_name = node_name() + "/activate";
+    ros::Subscriber sm_sub = nh.subscribe(topic_name, 1000, &base_behavior::activate_cb, this);
 }
 } // namespace behaviors

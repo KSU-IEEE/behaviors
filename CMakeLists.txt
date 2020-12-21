@@ -3,7 +3,7 @@ project(behaviors)
 
 # any dependencies here
 find_package(catkin REQUIRED
-    COMPONENTS message_generation std_msgs sensor_msgs)
+    COMPONENTS message_generation std_msgs roslaunch)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -71,6 +71,11 @@ catkin_package(
 )
 
 ###################################
+## TEST ##
+###################################
+roslaunch_add_file_check(launch/test_behavior.launch)
+
+###################################
 ## BUILD ##
 ###################################
 include_directories(
@@ -80,6 +85,7 @@ include_directories(
 
 set(SRCS 
   src/base_behavior.cpp
+  src/test_behavior.cpp
 )
 
 set(LIBS 
