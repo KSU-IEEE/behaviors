@@ -29,8 +29,13 @@ void base_behavior::activate_cb(const std_msgs::Bool::ConstPtr& activate) {
     while(in_control_)control_loop();
 }
 
+bool base_behavior::control_loop(){return false;}
+void base_behavior::set_params(){}
+void base_behavior::nodelet_init(){}
+
 void base_behavior::onInit() {
     // Create a ROS node handle
+    NODELET_INFO("CREATING NODE");
     ros::NodeHandle nh;
     set_nh(nh);
     
@@ -40,6 +45,6 @@ void base_behavior::onInit() {
 
     // setup route to activate with sm 
     string topic_name = node_name() + "/activate";
-    ros::Subscriber sm_sub = nh.subscribe(topic_name, 1000, &base_behavior::activate_cb, this);
+    sm_sub = nh.subscribe(topic_name, 1000, &base_behavior::activate_cb, this);
 }
 } // namespace behaviors

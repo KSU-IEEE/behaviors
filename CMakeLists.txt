@@ -2,8 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(behaviors)
 
 # any dependencies here
-find_package(catkin REQUIRED
-    COMPONENTS message_generation std_msgs roslaunch)
+find_package(catkin REQUIRED COMPONENTS
+  message_generation
+  std_msgs
+  roslaunch
+  nodelet)
 
 ################################################
 ## Declare ROS messages, services and actions ##

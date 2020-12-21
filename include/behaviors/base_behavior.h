@@ -32,9 +32,15 @@ public:
     // ros callbacks
     void activate_cb(const std_msgs::Bool::ConstPtr& activate);
 private:
-    string name_ = "base";
     bool in_control_ = true;
     ros::NodeHandle nh_; 
+
+    // subscribers and publishers
+    ros::Subscriber sm_sub;
+
+protected:
+    string name_ = "base";
+
 }; // class base_behavior
 } // namespace behaviors
 

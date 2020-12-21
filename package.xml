@@ -17,12 +17,14 @@
     <exec_depend>roslaunch</exec_depend>
 
     <build_depend>message_generation</build_depend>
+    <build_depend>nodelet</build_depend>
 
     <exec_depend>message_runtime</exec_depend>
     <exec_depend>rospy</exec_depend>
+    <exec_depend>nodelet</exec_depend>
 
     <!-- export nodelets -->
     <export>
-        <nodelet plugin="plugins/test_plugins.xml"/>
+        <nodelet plugin="${prefix}/plugins/test_plugins.xml"/>
     </export>
 </package>

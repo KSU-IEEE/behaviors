@@ -1,5 +1,5 @@
 <library path="lib/libbehaviors">
-  <class type="behaviors::tests::test_behavior" base_class_type="nodelet::Nodelet">
+  <class name="behaviors/test_behavior" type="behaviors::test_behavior" base_class_type="nodelet::Nodelet">
   <description>
   This is my nodelet.
   </description>
