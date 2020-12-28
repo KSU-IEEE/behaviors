@@ -91,39 +91,41 @@ set(SRCS
   src/test_behavior.cpp
 )
 
-set(LIBS 
-  ${catkin_LIBRARIES}
-)
-message(STATUS "${PROJECT_NAME} library compiling: ${SRCS}")
-add_library(behaviors ${SRCS})
-target_link_libraries(behaviors 
-    PUBLIC
-    ${LIBS})
-
-#update master CMakeLists.txt
-list(APPEND COMPILATION_TARGETS behaviors)
-
-#############
-## Install ##
-#############
-install(TARGETS behaviors
-  # ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+if ( NOT ("${SRCS}" STREQUAL "") )
+  set(LIBS 
+    ${catkin_LIBRARIES}
   )
+  message(STATUS "${PROJECT_NAME} library compiling: ${SRCS}")
+  add_library(behaviors ${SRCS})
+  target_link_libraries(behaviors 
+      PUBLIC
+      ${LIBS})
 
-## Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-   FILES_MATCHING PATTERN "*.h"
- )
-install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  FILES_MATCHING PATTERN "*.launch"
-  )
+  #update master CMakeLists.txt
+  list(APPEND COMPILATION_TARGETS behaviors)
 
-install(DIRECTORY plugins/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/plugins
-  FILES_MATCHING PATTERN "*.xml"
+  #############
+  ## Install ##
+  #############
+  install(TARGETS behaviors
+    # ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    )
+
+  ## Mark cpp header files for installation
+  install(DIRECTORY include/${PROJECT_NAME}/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h"
   )
+  install(DIRECTORY launch
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+    FILES_MATCHING PATTERN "*.launch"
+    )
+
+  install(DIRECTORY plugins/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/plugins
+    FILES_MATCHING PATTERN "*.xml"
+    )
+endif()
