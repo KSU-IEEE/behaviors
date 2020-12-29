@@ -76,7 +76,7 @@ catkin_package(
 ###################################
 ## TEST ##
 ###################################
-roslaunch_add_file_check(launch/test_behavior.launch)
+roslaunch_add_file_check(launch/test_behaviors.launch)
 
 ###################################
 ## BUILD ##
@@ -88,7 +88,8 @@ include_directories(
 
 set(SRCS 
   src/base_behavior.cpp
-  src/test_behavior.cpp
+  src/test_behavior1.cpp
+  src/test_behavior2.cpp
 )
 
 if ( NOT ("${SRCS}" STREQUAL "") )

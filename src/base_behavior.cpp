@@ -26,7 +26,7 @@ bool base_behavior::in_control() {
 
 void base_behavior::activate_cb(const std_msgs::Bool::ConstPtr& activate) {
     in_control_ = activate->data;
-    while(in_control_)control_loop();
+    control_loop();
 }
 
 bool base_behavior::control_loop(){return false;}
@@ -40,8 +40,8 @@ void base_behavior::onInit() {
     set_nh(nh);
     
     // initialize subscribers && grab params from launch files
-    nodelet_init();
     set_params();
+    nodelet_init();
 
     // setup route to activate with sm 
     string topic_name = node_name() + "/activate";

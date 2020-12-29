@@ -33,13 +33,14 @@ public:
     void activate_cb(const std_msgs::Bool::ConstPtr& activate);
 private:
     bool in_control_ = true;
-    ros::NodeHandle nh_; 
 
     // subscribers and publishers
     ros::Subscriber sm_sub;
 
 protected:
     string name_ = "base";
+    ros::NodeHandle nh_; 
+
 
 }; // class base_behavior
 } // namespace behaviors

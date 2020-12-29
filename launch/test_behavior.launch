@@ -1,6 +1,0 @@
-<launch>
-<node pkg="nodelet" 
-    type="nodelet" name="tester"
-    args="standalone behaviors/test_behavior"
-    respawn="false" output="screen"/>
-</launch>
