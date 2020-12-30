@@ -1,0 +1,16 @@
+<launch>
+<param name="base_num" type="int" value="100"/>
+<node pkg="nodelet" 
+    type="nodelet" name="tester"
+    args="standalone behaviors/test_behavior"
+    respawn="false" output="screen">
+    <param name="message" type="str" value="MY MESSAGE HAHAHAHAHAHAHAHAHA"/>
+</node>
+
+<node pkg="nodelet"
+    type="nodelet" name="tester2"
+    args="standalone behaviors/test_behavior2"
+    respawn="false" output="screen">
+    <param name="message" type="str" value="A DIFFERENCE MESSSAGE HAHAHAHAHAHAHAHAHAHAHA"/>
+</node>
+</launch>
