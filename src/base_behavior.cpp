@@ -35,7 +35,11 @@ void base_behavior::activate_cb(const std_msgs::Bool::ConstPtr& activate) {
     }
 }
 
-bool base_behavior::control_loop(){return false;}
+bool base_behavior::control_loop(){
+    std::string str = name_ + " in control";
+    std::cout<<str<<std::endl;
+    return false;
+}
 void base_behavior::set_params(){}
 void base_behavior::nodelet_init(){}
 
