@@ -25,13 +25,29 @@ bool base_behavior::in_control() {
 }
 
 void base_behavior::activate_cb(const std_msgs::Bool::ConstPtr& activate) {
-    in_control_ = activate->data;
-    control_loop();
+    if(activate->data && !in_control_) {
+        in_control_ = true;
+        deviceThread_ = boost::shared_ptr< boost::thread > 
+            (new boost::thread(boost::bind(&base_behavior::parent_control_loop, this)));
+        return;
+    } else if(!activate->data && in_control_) {
+        in_control_ = false;
+    }
 }
 
-bool base_behavior::control_loop(){return false;}
+bool base_behavior::control_loop(){
+    std::string str = name_ + " in control";
+    std::cout<<str<<std::endl;
+    return false;
+}
 void base_behavior::set_params(){}
 void base_behavior::nodelet_init(){}
+
+void base_behavior::parent_control_loop(){
+    while(in_control_) {
+        control_loop();
+    }
+}
 
 void base_behavior::onInit() {
     // Create a ROS node handle
