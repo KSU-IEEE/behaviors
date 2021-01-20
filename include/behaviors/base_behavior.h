@@ -6,6 +6,8 @@
 #include <std_msgs/Bool.h>
 #include <string.h>
 
+#include<boost/thread.hpp>
+
 using namespace std;
 namespace behaviors {
 class base_behavior : public nodelet::Nodelet {
@@ -22,6 +24,7 @@ public:
     virtual bool control_loop();
     virtual void set_params();
     virtual void nodelet_init();
+    void parent_control_loop();
 
     void set_nh(ros::NodeHandle nh);
     ros::NodeHandle nh();
@@ -32,8 +35,8 @@ public:
     // ros callbacks
     void activate_cb(const std_msgs::Bool::ConstPtr& activate);
 private:
-    bool in_control_ = true;
-
+    bool in_control_ = false;
+    boost::shared_ptr<boost::thread> deviceThread_;
     // subscribers and publishers
     ros::Subscriber sm_sub;
 
