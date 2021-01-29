@@ -33,11 +33,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   # DIRECTORY msg
-#    FILES
-# )
+# Generate messages in the 'msg' folder
+add_message_files(
+  # DIRECTORY msg
+   FILES target.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -52,11 +52,11 @@ find_package(catkin REQUIRED COMPONENTS
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#    DEPENDENCIES
-#    std_msgs sensor_msgs # Or other packages containing msgs
-# )
+# Generate added messages and services with any dependencies listed here
+generate_messages(
+   DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -70,7 +70,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES behaviors
-  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS roscpp message_runtime
 )
 
 ###################################
