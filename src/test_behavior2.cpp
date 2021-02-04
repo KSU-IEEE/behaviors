@@ -1,4 +1,4 @@
-#include "behaviors/test_behavior2.h"
+#include "test/test_behavior2.h"
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(behaviors::test_behavior2, nodelet::Nodelet);
 namespace behaviors {

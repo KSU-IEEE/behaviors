@@ -1,4 +1,4 @@
-#include <behaviors/base_behavior.h>
+#include <base_behavior.h>
 namespace behaviors {
 base_behavior::base_behavior() {}
 base_behavior::base_behavior(string node_name) {
