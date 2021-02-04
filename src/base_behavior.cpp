@@ -44,9 +44,16 @@ void base_behavior::set_params(){}
 void base_behavior::nodelet_init(){}
 
 void base_behavior::parent_control_loop(){
+    bool success;
     while(in_control_) {
-        control_loop();
+        success = control_loop();
+        if(success) {
+            std_msgs::Bool msg;
+            msg.data = success;
+            sm_pub.publish(msg);
+        }
     }
+
 }
 
 void base_behavior::onInit() {
@@ -62,5 +69,8 @@ void base_behavior::onInit() {
     // setup route to activate with sm 
     string topic_name = node_name() + "/activate";
     sm_sub = nh.subscribe(topic_name, 1000, &base_behavior::activate_cb, this);
+
+    topic_name = node_name() + "/completed";
+    sm_pub = nh.advertise<std_msgs::Bool>(topic_name, 1000);
 }
 } // namespace behaviors

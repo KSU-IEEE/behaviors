@@ -4,6 +4,8 @@
 #include <nodelet/nodelet.h>
 #include <pluginlib/class_list_macros.h>
 #include <std_msgs/Bool.h>
+#include <behaviors/target.h>
+
 #include <string.h>
 
 #include<boost/thread.hpp>
@@ -39,6 +41,7 @@ private:
     boost::shared_ptr<boost::thread> deviceThread_;
     // subscribers and publishers
     ros::Subscriber sm_sub;
+    ros::Publisher sm_pub;
 
 protected:
     string name_ = "base";
