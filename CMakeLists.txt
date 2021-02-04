@@ -88,8 +88,9 @@ include_directories(
 
 set(SRCS 
   src/base_behavior.cpp
-  src/test_behavior1.cpp
-  src/test_behavior2.cpp
+  src/test/test_behavior1.cpp
+  src/test/test_behavior2.cpp
+  src/pac-man-bot/attack_ghosts.cpp
 )
 
 if ( NOT ("${SRCS}" STREQUAL "") )
