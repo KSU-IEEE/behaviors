@@ -11,6 +11,9 @@ init::init() : base_behavior {"init"} {
     // really just hve this for the above line
 }
 
+init::~init() {
+
+}
 
 // callbacks
 void init::startSignal_cb(const std_msgs::Bool::ConstPtr& start) {
@@ -41,8 +44,9 @@ bool init::stopwatch(int seconds) {
 
     // send status
     int secs = int(floor(diff.count()));
-    if (secs % 5 == 0) {
-        print_msg("has waited for " + std::to_string(secs) + "seconds");
+    if (secs % 5 == 0 && secs != last_msg_) {
+        print_msg("has waited for " + std::to_string(secs) + " seconds");
+        last_msg_ = secs;
     }
     return diff.count() >= seconds;
 }
@@ -51,7 +55,7 @@ bool init::control_loop() {
     if (begin_) {
         time_out_ = stopwatch(THIRTY_SECS);
     }
-
+    
     return begin_ && (power_loc_ || time_out_);
 }
 

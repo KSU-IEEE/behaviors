@@ -27,5 +27,6 @@
     <export>
         <nodelet plugin="${prefix}/plugins/tester_plugins.xml"/>
         <nodelet plugin="${prefix}/plugins/tester2_plugins.xml"/>
+        <nodelet plugin="${prefix}/plugins/pac_man_plugins.xml"/>
     </export>
 </package>

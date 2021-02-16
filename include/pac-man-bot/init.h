@@ -37,7 +37,7 @@ publishers:
 
 namespace behaviors {
 namespace pac_man_behs {
-class init : base_behavior {
+class init : public base_behavior {
 public:
     init();
     ~init();
@@ -67,6 +67,7 @@ private:
     // timer componenets
     const int THIRTY_SECS = 29; // round down to be sure
     std::chrono::time_point<std::chrono::system_clock> start_time_;
+    int last_msg_ = -1;
 
 };  // init
 } // pac_man_behs

@@ -1,0 +1,16 @@
+<library path="lib/libbehaviors">
+  <class name="behaviors/pac-man-bot/init" 
+         type="behaviors::pac_man_behs::init" 
+         base_class_type="nodelet::Nodelet">
+  <description>
+    The first state in the pac-man-bot statemachine.
+    This behavior will control two 
+    things. First, it will control the switch waiting
+    period. This state will initialize on startup, and
+    wait for the start switch to be pressed. Secondly,
+    it will wait 30 seconds during the communication
+    phase. After both of these are completed, it will
+    release control.
+  </description>
+  </class>
+</library>
