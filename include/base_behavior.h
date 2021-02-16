@@ -10,6 +10,20 @@
 
 #include<boost/thread.hpp>
 
+// use this header in inhertied class
+/**************************************************
+project::state:
+
+A short summary
+
+End statement: what ends this state
+==================================================
+CONNECTIONS
+subscribers: subscibes to topics
+
+publishers: publishes to topics
+**************************************************/
+
 using namespace std;
 namespace behaviors {
 class base_behavior : public nodelet::Nodelet {
@@ -33,6 +47,8 @@ public:
     string node_name();
     void set_node_name(string name);
     bool in_control();
+
+    void print_msg(std::string msg);
 
     // ros callbacks
     void activate_cb(const std_msgs::Bool::ConstPtr& activate);

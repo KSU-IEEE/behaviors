@@ -68,7 +68,7 @@ generate_messages(
 ## CATKIN_: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include include/pac-man-bot
   LIBRARIES behaviors
   CATKIN_DEPENDS roscpp message_runtime
 )
@@ -91,6 +91,7 @@ set(SRCS
   src/test/test_behavior1.cpp
   src/test/test_behavior2.cpp
   src/pac-man-bot/attack_ghosts.cpp
+  src/pac-man-bot/init.cpp
 )
 
 if ( NOT ("${SRCS}" STREQUAL "") )

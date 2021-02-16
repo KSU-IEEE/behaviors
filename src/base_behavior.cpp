@@ -35,6 +35,10 @@ void base_behavior::activate_cb(const std_msgs::Bool::ConstPtr& activate) {
     }
 }
 
+void base_behavior::print_msg(std::string msg) {
+    std::cout<< name_ + ": " + msg <<std::endl;
+}
+
 bool base_behavior::control_loop(){
     std::string str = name_ + " in control";
     std::cout<<str<<std::endl;
