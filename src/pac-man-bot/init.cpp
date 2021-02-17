@@ -55,7 +55,7 @@ bool init::control_loop() {
     if (begin_) {
         time_out_ = stopwatch(THIRTY_SECS);
     }
-    
+
     return begin_ && (power_loc_ || time_out_);
 }
 
@@ -69,7 +69,7 @@ void init::nodelet_init() {
     subPPLoc        = nh().subscribe("PPLocation" , 1000, &init::ppLoc_cb       , this);
 
     // init pubs
-    pubStartListen  = nh().advertise<std_msgs::Bool>("StartListen", 1000);
+    pubStartListen  = nh().advertise<std_msgs::Bool>("StartListening", 1000);
 }
 
 }// pac_man_behs

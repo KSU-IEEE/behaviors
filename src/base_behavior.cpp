@@ -24,13 +24,14 @@ bool base_behavior::in_control() {
     return in_control_;
 }
 
-void base_behavior::activate_cb(const std_msgs::Bool::ConstPtr& activate) {
-    if(activate->data && !in_control_) {
+void base_behavior::activate_cb(const behaviors::target::ConstPtr& activate_val) {
+    if(activate_val->activate.data && !in_control_) {
         in_control_ = true;
+        set_goal(activate_val->goal.data);
         deviceThread_ = boost::shared_ptr< boost::thread > 
             (new boost::thread(boost::bind(&base_behavior::parent_control_loop, this)));
         return;
-    } else if(!activate->data && in_control_) {
+    } else if(!activate_val->activate.data && in_control_) {
         in_control_ = false;
     }
 }

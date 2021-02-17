@@ -35,8 +35,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 # Generate messages in the 'msg' folder
 add_message_files(
-  # DIRECTORY msg
-   FILES target.msg
+  DIRECTORY msg
+  #  FILES target.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -83,6 +83,8 @@ roslaunch_add_file_check(launch/test_behaviors.launch)
 ###################################
 include_directories(
     include
+    include/pac-man-bot
+    include/test
     ${catkin_INCLUDE_DIRS}
 )
 
@@ -92,6 +94,7 @@ set(SRCS
   src/test/test_behavior2.cpp
   src/pac-man-bot/attack_ghosts.cpp
   src/pac-man-bot/init.cpp
+  src/pac-man-bot/check_for_ghosts.cpp
 )
 
 if ( NOT ("${SRCS}" STREQUAL "") )

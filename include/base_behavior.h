@@ -47,13 +47,19 @@ public:
     string node_name();
     void set_node_name(string name);
     bool in_control();
+    void set_goal(char val){goal_ = val;}
+    char get_goal() {return goal_;}
+
 
     void print_msg(std::string msg);
 
     // ros callbacks
-    void activate_cb(const std_msgs::Bool::ConstPtr& activate);
+    void activate_cb(const behaviors::target::ConstPtr& activate);
 private:
+    // control cariables
     bool in_control_ = false;
+    char goal_;
+
     boost::shared_ptr<boost::thread> deviceThread_;
     // subscribers and publishers
     ros::Subscriber sm_sub;
