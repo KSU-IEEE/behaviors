@@ -13,4 +13,14 @@
     release control.
   </description>
   </class>
+
+  <class name="behaviors/pac-man-bot/check_for_ghosts" 
+         type="behaviors::pac_man_behs::check_for_ghosts" 
+         base_class_type="nodelet::Nodelet">
+  <description>
+    This is the second state within the pac-man-bot sm.
+    It checks where the ghosts are publishes that out to
+    all the states that need it.
+  </description>
+  </class>
 </library>

@@ -1,9 +1,0 @@
-<launch>
-<node   pkg="nodelet"
-        type="nodelet" name="init"
-        args="standalone behaviors/pac-man-bot/init"
-        respawn="true" output="screen">
-    <!-- put args here -->
-</node>
-
-</launch>

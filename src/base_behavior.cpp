@@ -63,7 +63,7 @@ void base_behavior::parent_control_loop(){
 
 void base_behavior::onInit() {
     // Create a ROS node handle
-    NODELET_INFO("CREATING NODE");
+    print_msg("initializing");
     ros::NodeHandle nh;
     set_nh(nh);
     

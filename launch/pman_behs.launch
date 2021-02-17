@@ -1,0 +1,16 @@
+<launch>
+<node   pkg="nodelet"
+        type="nodelet" name="init"
+        args="standalone behaviors/pac-man-bot/init"
+        respawn="true" output="screen">
+    <!-- put args here -->
+</node>
+
+<node   pkg="nodelet"
+        type="nodelet" name="check_for_ghosts"
+        args="standalone behaviors/pac-man-bot/check_for_ghosts"
+        respawn="true" output="screen">
+    <!-- put args here -->
+</node>
+
+</launch>
