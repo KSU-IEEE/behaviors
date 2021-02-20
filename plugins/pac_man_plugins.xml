@@ -23,4 +23,23 @@
     all the states that need it.
   </description>
   </class>
+
+  <class name="behaviors/pac-man-bot/ground_search" 
+         type="behaviors::pac_man_behs::ground_search" 
+         base_class_type="nodelet::Nodelet">
+  <description>
+ground search will perform the search in the two 
+boxes f and h. This will have a small internal 
+state machine:
+- move to start
+    - moves to the starting point for the search
+- search
+    - slowly moves down the wall
+    - exists when at the bottom
+grab block
+    - if a block is found during the search, then
+        grab it
+    - returns to last point in search
+  </description>
+  </class>
 </library>

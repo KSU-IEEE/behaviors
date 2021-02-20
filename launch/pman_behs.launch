@@ -13,4 +13,11 @@
     <!-- put args here -->
 </node>
 
+<node   pkg="nodelet"
+        type="nodelet" name="ground_search"
+        args="standalone behaviors/pac-man-bot/ground_search"
+        respawn="true" output="screen">
+    <!-- put args here -->
+</node>
+
 </launch>

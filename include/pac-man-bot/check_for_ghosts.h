@@ -30,6 +30,7 @@ publishers:
 #include <behaviors/distances.h>
 #include <behaviors/coordinate.h>
 #include <std_msgs/Int8.h>
+#include <std_msgs/Bool.h> 
 
 // random includes
 #include <vector>

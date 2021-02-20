@@ -35,7 +35,7 @@ check_for_ghosts::~check_for_ghosts() {
 void check_for_ghosts::distances_cb(const behaviors::distances::ConstPtr& msg) {
     // to save some threads, don't do this everytime
     if(in_control()){
-        front_dist_ = msg -> foward.data;
+        front_dist_ = msg -> front.data;
         back_dist_ =  msg -> backward.data;
         left_dist_ =  msg -> left.data;
         right_dist_ = msg -> right.data;
