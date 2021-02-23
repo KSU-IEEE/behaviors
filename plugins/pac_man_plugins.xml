@@ -42,4 +42,19 @@ grab block
     - returns to last point in search
   </description>
   </class>
+
+  <class name="behaviors/pac-man-bot/reach_search" 
+         type="behaviors::pac_man_behs::reach_search" 
+         base_class_type="nodelet::Nodelet">
+  <description>
+This class is used to search over the walls in 
+the pac-man-bot arena. To do this, we will take in
+the distance sent from the arm to monitor when an 
+block passes from underneath it to grab.
+
+This also inherits from ground_search because there
+were a lot of similarities between the two. Bc of 
+this, it has the same fsm as class.
+  </description>
+  </class>
 </library>

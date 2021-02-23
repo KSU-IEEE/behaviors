@@ -9,7 +9,7 @@
 <node   pkg="nodelet"
         type="nodelet" name="check_for_ghosts"
         args="standalone behaviors/pac-man-bot/check_for_ghosts"
-        respawn="true" output="screen">
+        respawn="true" output="screen"> 
     <!-- put args here -->
 </node>
 
@@ -18,6 +18,14 @@
         args="standalone behaviors/pac-man-bot/ground_search"
         respawn="true" output="screen">
     <!-- put args here -->
+</node>
+
+<node   pkg="nodelet"
+        type="nodelet" name="reach_search"
+        args="standalone behaviors/pac-man-bot/reach_search"
+        respawn="true" output="screen">
+    <!-- put args here -->
+    <param name="/reach_search/targetArmDistance" type="double" value="2.5" />
 </node>
 
 </launch>

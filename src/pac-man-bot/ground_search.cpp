@@ -55,9 +55,9 @@ bool ground_search::doneMoving() {
     return false;
 }
 // search functions
-bool ground_search::checkHeading() {
+bool ground_search::checkHeading(int head) {
     // set heading first -- only send once
-    if (heading_ != 0 && ! waiting_for_head_) {
+    if (heading_ != head && ! waiting_for_head_) {
         std_msgs::Float64 msg;
         msg.data = 0;
         pub_setHeading.publish(msg);
@@ -154,7 +154,7 @@ bool ground_search::moveToStart() {
 
 bool ground_search::search() {
     // check if heading is 0
-    if (!checkHeading()) return false;
+    if (!checkHeading(TARGET_HEADING)) return false;
 
     // heading is correct, now start search
     // do a series of small searches every .5 inches
@@ -170,6 +170,8 @@ bool ground_search::search() {
 
     // check if done with pattern
     if (curr_y_ > 42.5 && !returner) search_done_ = true;
+
+    return returner;
 }
 bool ground_search::grabBlock() {
     // two conditions. initial block check when check_ahead_ == false

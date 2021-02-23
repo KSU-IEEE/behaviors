@@ -73,17 +73,17 @@ public:
     ros::Publisher pub_goTo, pub_setHeading;
 
     // fsm functions
-    bool moveToStart();  // returns true when completed move
-    bool search();       // returns true when finding a block
-    bool grabBlock();    // returns true when returned back to staritng position
+    virtual bool moveToStart();  // returns true when completed move
+    virtual bool search();       // returns true when finding a block
+    virtual bool grabBlock();    // returns true when returned back to staritng position
 
     // internal funcs
     bool doneMoving();
 
     // search functions
-    bool checkHeading();
-    bool next();
-    bool check();
+    bool checkHeading(int head);
+    virtual bool next();
+    virtual bool check();
 private:
 // I want to reuse this for reach_search, so movign everything to protected
 
@@ -93,6 +93,7 @@ protected:
 
     // call back vars
     bool done_moving_ = false;
+    bool arm_done_moving_ = false;
     int heading_;
     float curr_x_, curr_y_;
     float front_dist_, back_dist_, left_dist_, right_dist_;
@@ -109,8 +110,9 @@ protected:
     bool checked_ahead_ = false;
 
     // constants -- in form x,y
-    const std::pair<float, float> LOCATION_F = {5.5, 35};
-    const std::pair<float, float> LOCATION_H = {95, 35};
+    const std::pair<float, float> LOCATION_F = {4, 34.5};
+    const std::pair<float, float> LOCATION_H = {78.5, 34.5};
+    const int TARGET_HEADING = 0;
 };  // ground_search
 
 } // pac_man_behs
