@@ -28,4 +28,11 @@
     <param name="/reach_search/targetArmDistance" type="double" value="2.5" />
 </node>
 
+<node   pkg="nodelet"
+        type="nodelet" name="attack_ghosts"
+        args="standalone behaviors/pac-man-bot/attack_ghosts"
+        respawn="true" output="screen">
+    <!-- put args here -->
+</node>
+
 </launch>
