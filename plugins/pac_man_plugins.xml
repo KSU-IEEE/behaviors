@@ -71,4 +71,22 @@
     control
   </description>
   </class>
+
+  <class name="behaviors/pac-man-bot/return_to_start" 
+         type="behaviors::pac_man_behs::return_to_start" 
+         base_class_type="nodelet::Nodelet">
+  <description>
+    This is the second to last state in the SM, it will
+    return the bot to the home position
+    control
+  </description>
+  </class>
+
+  <class name="behaviors/pac-man-bot/end_beh" 
+         type="behaviors::pac_man_behs::end_beh" 
+         base_class_type="nodelet::Nodelet">
+  <description>
+    This class just sits there
+  </description>
+  </class>  
 </library>

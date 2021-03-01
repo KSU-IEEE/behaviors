@@ -97,6 +97,8 @@ set(SRCS
   src/pac-man-bot/check_for_ghosts.cpp
   src/pac-man-bot/ground_search.cpp
   src/pac-man-bot/reach_search.cpp
+  src/pac-man-bot/end.cpp
+  src/pac-man-bot/return_to_start.cpp
 )
 
 if ( NOT ("${SRCS}" STREQUAL "") )
