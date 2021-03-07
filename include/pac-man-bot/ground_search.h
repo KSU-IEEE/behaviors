@@ -26,7 +26,10 @@ CONNECTIONS
 subscribers:
     finishedMove
     heading
-    distances
+    frontDist
+    backDist
+    leftDist
+    rightDist
     position
 
 publishers: 
@@ -61,11 +64,15 @@ public:
     void nodelet_init() override;
 
     // subsribers and cbs
-    ros::Subscriber sub_finishedMove, sub_heading, sub_distances,
+    ros::Subscriber sub_frontDist, sub_backDist, sub_leftDist, sub_rightDist;
+    ros::Subscriber sub_finishedMove, sub_heading,
                     sub_posiiton;
     void finishedMove_cb(const std_msgs::Bool::ConstPtr& yes);
     void heading_cb(const std_msgs::Float64::ConstPtr& degree);
-    void distances_cb(const behaviors::distances::ConstPtr& data);
+    void frontDist_cb(const behaviors::distances::ConstPtr& val);
+    void backDist_cb(const behaviors::distances::ConstPtr& val);
+    void leftDist_cb(const behaviors::distances::ConstPtr& val);
+    void rightDist_cb(const behaviors::distances::ConstPtr& val);
     void pos_cb(const behaviors::coordinate::ConstPtr& data);
 
 

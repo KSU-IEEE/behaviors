@@ -16,7 +16,10 @@ End statement:
 ==================================================
 CONNECTIONS
 subscribers: 
-    distances
+    frontDist
+    backDist
+    leftDist
+    rightDist
     heading
     finishedMove
 
@@ -49,9 +52,14 @@ public:
     void nodelet_init() override;
 
     // subs and cbs
-    ros::Subscriber subDistances, subHeading,
+    ros::Subscriber sub_frontDist, sub_backDist, sub_leftDist, sub_rightDist;
+    ros::Subscriber subHeading,
                     subFinishedMove;
-    void distances_cb(const behaviors::distances::ConstPtr& data);
+    void frontDist_cb(const behaviors::distances::ConstPtr& val);
+    void backDist_cb(const behaviors::distances::ConstPtr& val);
+    void leftDist_cb(const behaviors::distances::ConstPtr& val);
+    void rightDist_cb(const behaviors::distances::ConstPtr& val);
+
     void heading_cb(const std_msgs::Float64::ConstPtr& degree)
         {heading_ = int(degree->data) % 360;} // keep it simple
     void finishedMove_cb(const std_msgs::Bool::ConstPtr& yes)

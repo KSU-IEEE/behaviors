@@ -100,10 +100,10 @@ private:
     bool ghost5_ = false;
 
     // constants
-    const std::pair<float, float> GHOST_LOC1 = {26, 16};
-    const std::pair<float, float> GHOST_LOC2 = {61, 16};
-    const std::pair<float, float> GHOST_LOC3 = {26, 10.5};
-    const std::pair<float, float> GHOST_LOC4 = {61, 10.5};
+    const std::pair<float, float> GHOST_LOC1 = {25, 26};
+    const std::pair<float, float> GHOST_LOC2 = {70, 26};
+    const std::pair<float, float> GHOST_LOC3 = {25, 10.5};
+    const std::pair<float, float> GHOST_LOC4 = {70, 10.5};
     const std::pair<float, float> GHOST_LOC5 = {43.5, 10};
 };  // attack_ghosts
 } // pac_man_behs

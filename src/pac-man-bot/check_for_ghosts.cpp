@@ -32,15 +32,23 @@ check_for_ghosts::~check_for_ghosts() {
 }
 
 // callbacks
-void check_for_ghosts::distances_cb(const behaviors::distances::ConstPtr& msg) {
-    // to save some threads, don't do this everytime
-    if(in_control()){
-        front_dist_ = msg -> front.data;
-        back_dist_ =  msg -> backward.data;
-        left_dist_ =  msg -> left.data;
-        right_dist_ = msg -> right.data;
-    }
+// distance callbacks. take the smaller of the two values
+void check_for_ghosts::frontDist_cb(const behaviors::distances::ConstPtr& val) {
+    front_dist_ = (val->left > val->right) ? val->right : val->left;
 }
+
+void check_for_ghosts::backDist_cb(const behaviors::distances::ConstPtr& val) {
+    back_dist_ = (val->left > val->right) ? val->right : val->left;
+}
+
+void check_for_ghosts::leftDist_cb(const behaviors::distances::ConstPtr& val) {
+    left_dist_ = (val->left > val->right) ? val->right : val->left;
+}
+
+void check_for_ghosts::rightDist_cb(const behaviors::distances::ConstPtr& val) {
+    right_dist_ = (val->left > val->right) ? val->right : val->left;
+}
+
 
 // class specific functions
 bool check_for_ghosts::checkGhosts() {
@@ -156,7 +164,11 @@ void check_for_ghosts::set_params(){
 
 void check_for_ghosts::nodelet_init(){
     // init subs
-    subDistances    = nh().subscribe("distances", 100, &check_for_ghosts::distances_cb   , this);
+    sub_frontDist = nh().subscribe("sensors/front", 100, &check_for_ghosts::frontDist_cb, this);
+    sub_backDist = nh().subscribe("sensors/back", 100, &check_for_ghosts::backDist_cb, this);
+    sub_leftDist = nh().subscribe("sensors/left", 100, &check_for_ghosts::leftDist_cb, this);
+    sub_rightDist = nh ().subscribe("sensors/right", 100, &check_for_ghosts::rightDist_cb, this);
+
     subHeading      = nh().subscribe("heading"  , 100, &check_for_ghosts::heading_cb     , this);
     subFinishedMove = nh().subscribe("moveDone" , 100, &check_for_ghosts::finishedMove_cb, this);
 

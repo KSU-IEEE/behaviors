@@ -29,11 +29,21 @@ void ground_search::finishedMove_cb(const std_msgs::Bool::ConstPtr& yes) {
     done_moving_ =  yes->data;
 }
 
-void ground_search::distances_cb(const behaviors::distances::ConstPtr& data) {
-    front_dist_ = data->front.data;
-    back_dist_  = data->backward.data;
-    left_dist_  = data->left.data;
-    right_dist_ = data->right.data;
+// distance callbacks. take the smaller of the two values
+void ground_search::frontDist_cb(const behaviors::distances::ConstPtr& val) {
+    front_dist_ = (val->left > val->right) ? val->right : val->left;
+}
+
+void ground_search::backDist_cb(const behaviors::distances::ConstPtr& val) {
+    back_dist_ = (val->left > val->right) ? val->right : val->left;
+}
+
+void ground_search::leftDist_cb(const behaviors::distances::ConstPtr& val) {
+    left_dist_ = (val->left > val->right) ? val->right : val->left;
+}
+
+void ground_search::rightDist_cb(const behaviors::distances::ConstPtr& val) {
+    right_dist_ = (val->left > val->right) ? val->right : val->left;
 }
 
 void ground_search::pos_cb(const behaviors::coordinate::ConstPtr& data) {
@@ -222,7 +232,10 @@ void ground_search::nodelet_init() {
     // init subs 
     sub_finishedMove = nh().subscribe("moveDone" , 1000, &ground_search::finishedMove_cb, this);
     sub_heading      = nh().subscribe("heading"  , 1000, &ground_search::heading_cb     , this);
-    sub_distances    = nh().subscribe("distances", 1000, &ground_search::distances_cb   , this);
+    sub_frontDist = nh().subscribe("sensors/front", 100, &ground_search::frontDist_cb, this);
+    sub_backDist = nh().subscribe("sensors/back", 100, &ground_search::backDist_cb, this);
+    sub_leftDist = nh().subscribe("sensors/left", 100, &ground_search::leftDist_cb, this);
+    sub_rightDist = nh ().subscribe("sensors/right", 100, &ground_search::rightDist_cb, this);
     sub_posiiton     = nh().subscribe("pose"     , 1000, &ground_search::pos_cb         , this);
 
     // init pubs

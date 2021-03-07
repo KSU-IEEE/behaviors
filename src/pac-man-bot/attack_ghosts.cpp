@@ -118,6 +118,7 @@ bool attack_ghosts::set_heading()  {
 
     return false;
 }
+
 bool attack_ghosts::grab()  {
     // will need to eventually do arm stuff here, for now just do ghosts
 
