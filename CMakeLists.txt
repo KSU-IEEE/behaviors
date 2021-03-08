@@ -111,6 +111,8 @@ if ( NOT ("${SRCS}" STREQUAL "") )
       PUBLIC
       ${LIBS})
 
+  add_dependencies(behaviors ${catkin_EXPORTED_TARGETS})
+
   #update master CMakeLists.txt
   list(APPEND COMPILATION_TARGETS behaviors)
 
