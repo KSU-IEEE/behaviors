@@ -3,6 +3,7 @@ project(behaviors)
 
 # any dependencies here
 find_package(catkin REQUIRED COMPONENTS
+  roscpp
   message_generation
   std_msgs
   roslaunch
@@ -70,7 +71,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include include/pac-man-bot
   LIBRARIES behaviors
-  CATKIN_DEPENDS roscpp message_runtime
+  CATKIN_DEPENDS message_runtime
 )
 
 ###################################
@@ -109,7 +110,8 @@ if ( NOT ("${SRCS}" STREQUAL "") )
   add_library(behaviors ${SRCS})
   target_link_libraries(behaviors 
       PUBLIC
-      ${LIBS})
+      ${LIBS}
+      )
 
   add_dependencies(behaviors ${catkin_EXPORTED_TARGETS})
 
