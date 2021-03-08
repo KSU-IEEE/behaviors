@@ -26,6 +26,7 @@ bool base_behavior::in_control() {
 
 void base_behavior::activate_cb(const behaviors::target::ConstPtr& activate_val) {
     if(activate_val->activate.data && !in_control_) {
+        print_msg("In Control");
         in_control_ = true;
         set_goal(activate_val->goal.data);
         deviceThread_ = boost::shared_ptr< boost::thread > 
@@ -53,8 +54,10 @@ void base_behavior::parent_control_loop(){
     while(in_control_) {
         success = control_loop();
         if(success) {
-            std_msgs::Bool msg;
-            msg.data = success;
+            print_msg("giving up control");
+            behaviors::completed msg;
+            msg.yes = success;
+            msg.behavior = name_;
             sm_pub.publish(msg);
         }
     }
@@ -76,6 +79,6 @@ void base_behavior::onInit() {
     sm_sub = nh.subscribe(topic_name, 1000, &base_behavior::activate_cb, this);
 
     topic_name = node_name() + "/completed";
-    sm_pub = nh.advertise<std_msgs::Bool>(topic_name, 1000);
+    sm_pub = nh.advertise<behaviors::completed>(topic_name, 1000);
 }
 } // namespace behaviors

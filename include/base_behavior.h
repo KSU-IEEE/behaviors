@@ -5,6 +5,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <std_msgs/Bool.h>
 #include <behaviors/target.h>
+#include <behaviors/completed.h>
 
 #include <string.h>
 

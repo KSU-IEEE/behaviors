@@ -39,6 +39,23 @@ void attack_ghosts::ghostLoc_cb(const std_msgs::Int8::ConstPtr& loc) {
     }
 }
 
+void attack_ghosts::armDone_cb(const std_msgs::Bool::ConstPtr& yes) {
+    grabbing = !yes->data;
+
+    // update ghosts list 
+    // go through ghosts and unset the top most
+    if (yes->data) {
+             if (ghost1_) ghost1_ = false;
+        else if (ghost2_) ghost2_ = false;
+        else if (ghost3_) ghost3_ = false;
+        else if (ghost4_) ghost4_ = false;
+        else if (ghost5_) ghost5_ = false;
+
+        print_msg("Grabbed dat ghost");
+    }
+}
+
+
 void attack_ghosts::heading_cb(const std_msgs::Float64::ConstPtr& degree) {
     heading_ = degree->data;
 }
@@ -64,7 +81,7 @@ bool attack_ghosts::stopwatch(int seconds) {
 
 bool attack_ghosts::move()  {
     // create condiitoins
-    if (!sent_loc_) {
+    if (!sent_loc_ && !grabbing) {
         // send locations, prioritze top, then bottome, then middle
         // becuase of where you will be starting (at a or c) and that
         // middle will put you right above the starting box
@@ -72,20 +89,20 @@ bool attack_ghosts::move()  {
         behaviors::coordinate msg;
 
         if (ghost1_) {
-            msg.X.data = GHOST_LOC1.first;
-            msg.Y.data = GHOST_LOC1.second;
+            msg.X = GHOST_LOC1.first - 3;
+            msg.Y = GHOST_LOC1.second + distancePickUp_;
         } else if (ghost2_) {
-            msg.X.data = GHOST_LOC2.first;
-            msg.Y.data = GHOST_LOC2.second;
+            msg.X = GHOST_LOC2.first - 3;
+            msg.Y = GHOST_LOC2.second + distancePickUp_;
         } else if (ghost3_) {
-            msg.X.data = GHOST_LOC3.first;
-            msg.Y.data = GHOST_LOC3.second;
+            msg.X = GHOST_LOC3.first - 3;
+            msg.Y = GHOST_LOC3.second + distancePickUp_;
         } else if (ghost4_) {
-            msg.X.data = GHOST_LOC4.first;
-            msg.Y.data = GHOST_LOC4.second;
+            msg.X = GHOST_LOC4.first; - 3;
+            msg.Y = GHOST_LOC4.second + distancePickUp_;
         } else {
-            msg.X.data = GHOST_LOC5.first;
-            msg.Y.data = GHOST_LOC5.second;
+            msg.X = GHOST_LOC5.first - distancePickUp_;
+            msg.Y = GHOST_LOC5.second - 3;
         }
 
         pub_goTo.publish(msg);
@@ -94,44 +111,14 @@ bool attack_ghosts::move()  {
     } else if(!finished_move_) {
         return false;
     } else {
+        start_grabbing = true;
         sent_loc_ = false;
         return true;
     }
 }
-bool attack_ghosts::set_heading()  {
-    if (!sent_head_) {
-        // heading is down for first 4 ghosts and up for last ghost
-        std_msgs::Float64 msg;
-
-        if (ghost1_ || ghost2_ || ghost3_ || ghost4_) {
-            msg.data = 90;
-            target_head_ = 90;
-        } else {
-            target_head_ = 0;
-            msg.data = 0;
-        }
-
-        pub_setHeading.publish(msg);
-    } else if (sent_head_ && heading_ == target_head_) {
-        return true;
-    }
-
-    return false;
-}
 
 bool attack_ghosts::grab()  {
-    // will need to eventually do arm stuff here, for now just do ghosts
-
-    if(arm_done_) {
-        // go through ghosts and unset the top most
-             if (ghost1_) ghost1_ = false;
-        else if (ghost2_) ghost2_ = false;
-        else if (ghost3_) ghost3_ = false;
-        else if (ghost4_) ghost4_ = false;
-        else if (ghost5_) ghost5_ = false;
-
-        print_msg("Grabbed dat ghost");
-    }
+    // if (start_grabbing()) ;
 }
 
 // overrides
@@ -141,6 +128,7 @@ bool attack_ghosts::control_loop() {
     if (initialRun_) {
         print_msg("Starting Timer");
         start_time_ = std::chrono::system_clock::now();
+        initialRun_ = false;
     }
 
     // check if out of time
@@ -149,30 +137,9 @@ bool attack_ghosts::control_loop() {
     // actual state here
     // start by moving to desired location 
 
-    bool transition = false;
-
-    switch(fsm) {
-        case ag_fsm::move:
-            transition = move();
-
-            fsm = (transition) ? ag_fsm::set_heading : fsm;
-
-            break;
-        case ag_fsm::set_heading:
-            transition = set_heading();
-            
-            fsm = (transition) ? ag_fsm::grab : fsm;
-
-            break;
-        case ag_fsm::grab:
-            transition = grab();
-
-            fsm = (transition) ? ag_fsm::move : fsm;
-
-            break;
-        default: 
-            break;
-    }
+    // changing this, we only need to move and grab
+    move();
+    grab();
 
     ghosts_killed_ = !ghost1_ && !ghost2_ && !ghost3_ && !ghost4_ && !ghost5_;
 
@@ -180,7 +147,11 @@ bool attack_ghosts::control_loop() {
 }
 
 void attack_ghosts::set_params() {
-    
+    float armlength, armBase;
+    nh().getParam("arm/length", armlength);
+    nh().getParam("arm/baseHeight", armBase);
+
+    distancePickUp_ = acos(armBase / armlength); // see oneNote
 }
 
 void attack_ghosts::nodelet_init() {
@@ -188,10 +159,13 @@ void attack_ghosts::nodelet_init() {
     sub_ghostLoc = nh().subscribe("ghostLocation", 100, &attack_ghosts::ghostLoc_cb, this);
     sub_finishedMove = nh().subscribe("moveDone", 100, &attack_ghosts::finishedMove_cb, this); 
     sub_heading = nh().subscribe("heading", 100, &attack_ghosts::heading_cb, this);
+    sub_armDone = nh().subscribe("arm/done", 100, &attack_ghosts::armDone_cb, this);
 
     // init pubs
     pub_goTo = nh().advertise<behaviors::coordinate>("moveTo", 1000);
     pub_setHeading = nh().advertise<std_msgs::Float64>("setHeading", 1000);
+    pub_armGrabBlock = nh().advertise<std_msgs::Float64>("arm/grabBlock", 1000);
+
 }
 }// pac_man_behs
 }//  behaviors

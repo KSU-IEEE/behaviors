@@ -151,8 +151,8 @@ void reach_search::moveBot() {
     if (move_) {
         // pack up coordinate msg 
         behaviors::coordinate msg;
-        msg.X.data = curr_x_ + .5;
-        msg.Y.data = curr_y_;
+        msg.X = curr_x_ + .5;
+        msg.Y = curr_y_;
         pub_goTo.publish(msg);
     }
 }
@@ -203,24 +203,24 @@ bool reach_search::moveToStart() {
     if (!sent_loc_) {
         switch(get_goal()){
         case 'A':
-            msg.X.data = LOCATION_A.first;
-            msg.Y.data = LOCATION_A.second;
+            msg.X = LOCATION_A.first;
+            msg.Y = LOCATION_A.second;
             break;
         case 'B':
-            msg.X.data = LOCATION_B.first;
-            msg.Y.data = LOCATION_B.second;
+            msg.X = LOCATION_B.first;
+            msg.Y = LOCATION_B.second;
             break;
         case 'C':
-            msg.X.data = LOCATION_C.first;
-            msg.Y.data = LOCATION_C.second;
+            msg.X = LOCATION_C.first;
+            msg.Y = LOCATION_C.second;
             break;
         case 'D':
-            msg.X.data = LOCATION_D.first;
-            msg.Y.data = LOCATION_D.second;
+            msg.X = LOCATION_D.first;
+            msg.Y = LOCATION_D.second;
             break;
         case 'E':
-            msg.X.data = LOCATION_E.first;
-            msg.Y.data = LOCATION_E.second;
+            msg.X = LOCATION_E.first;
+            msg.Y = LOCATION_E.second;
             break;
         default: break;
         }

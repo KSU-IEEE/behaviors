@@ -1,0 +1,2 @@
+string behavior
+bool yes

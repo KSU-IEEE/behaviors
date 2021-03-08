@@ -25,12 +25,13 @@ subscribers:
     ghostLocation
     heading
     finishedMove
+    arm/grabBlock
 
 publishers: 
     goTo
     setHeading
+    arm/Done
 
-NOTE: will have to add arm pubs and subs as well
 **************************************************/
 // ros includes
 #include <std_msgs/Int8.h>
@@ -59,18 +60,18 @@ public:
 
     // ros subscribers and cbs
     ros::Subscriber sub_ghostLoc, sub_finishedMove, 
-                    sub_heading;
+                    sub_heading, sub_armDone;
     void ghostLoc_cb(const std_msgs::Int8::ConstPtr& loc);
     void heading_cb(const std_msgs::Float64::ConstPtr& degree);
     void finishedMove_cb(const std_msgs::Bool::ConstPtr& yes);
+    void armDone_cb(const std_msgs::Bool::ConstPtr& yes);
 
     // ros pubs
-    ros::Publisher pub_goTo, pub_setHeading;
+    ros::Publisher pub_goTo, pub_setHeading, pub_armGrabBlock;
 
     // internal 
     bool stopwatch(int seconds);
     bool move();
-    bool set_heading();
     bool grab();
 private:
     // ros vars
@@ -80,6 +81,9 @@ private:
     // end conditions
     bool ghosts_killed_, timer_;
 
+    // function of arm parameters
+    float distancePickUp_;
+
     // timer componenets
     std::chrono::time_point<std::chrono::system_clock> start_time_;
     int last_msg_ = -1;
@@ -88,7 +92,8 @@ private:
     // fsm
     ag_fsm fsm = ag_fsm::move;
     bool sent_loc_ = false;
-    bool sent_head_ = false;
+    bool grabbing = false;
+    bool start_grabbing = false;
     int target_head_;
     bool arm_done_ = false;
 
@@ -100,11 +105,13 @@ private:
     bool ghost5_ = false;
 
     // constants
-    const std::pair<float, float> GHOST_LOC1 = {25, 26};
-    const std::pair<float, float> GHOST_LOC2 = {70, 26};
-    const std::pair<float, float> GHOST_LOC3 = {25, 10.5};
-    const std::pair<float, float> GHOST_LOC4 = {70, 10.5};
-    const std::pair<float, float> GHOST_LOC5 = {43.5, 10};
+    const std::pair<float, float> GHOST_LOC1 = {34.5, 24};
+    const std::pair<float, float> GHOST_LOC2 = {64.5, 24};
+    const std::pair<float, float> GHOST_LOC3 = {29.5, 10.5};
+    const std::pair<float, float> GHOST_LOC4 = {64.5, 10.5};
+    const std::pair<float, float> GHOST_LOC5 = {39.5, 16};
+
+    
 };  // attack_ghosts
 } // pac_man_behs
 } // behaviors

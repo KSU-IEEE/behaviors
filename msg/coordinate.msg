@@ -1,2 +1,2 @@
-std_msgs/Float64 X
-std_msgs/Float64 Y
+float64 X
+float64 Y

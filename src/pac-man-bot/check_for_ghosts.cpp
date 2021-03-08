@@ -89,8 +89,8 @@ void check_for_ghosts::sendMoveCmd() {
     done_moving_ = false;
 
     behaviors::coordinate msg;
-    msg.X.data = locs_.at(curr_target).first;
-    msg.Y.data = locs_.at(curr_target).second;
+    msg.X = locs_.at(curr_target).first;
+    msg.Y = locs_.at(curr_target).second;
     
     pubGoTo.publish(msg);
 }

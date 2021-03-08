@@ -47,8 +47,8 @@ void ground_search::rightDist_cb(const behaviors::distances::ConstPtr& val) {
 }
 
 void ground_search::pos_cb(const behaviors::coordinate::ConstPtr& data) {
-    curr_x_ = data->X.data;
-    curr_y_ = data->Y.data;
+    curr_x_ = data->X;
+    curr_y_ = data->Y;
 }
 
 
@@ -86,8 +86,8 @@ bool ground_search::next() {
     if (!sent_loc_) {
         // make target and send
         behaviors::coordinate msg;
-        msg.X.data = curr_x_;
-        msg.Y.data = curr_y_ - .5;
+        msg.X = curr_x_;
+        msg.Y = curr_y_ - .5;
         pub_goTo.publish(msg);
 
         sent_loc_ = true;
@@ -151,8 +151,8 @@ bool ground_search::moveToStart() {
 
         // pack and send message
         behaviors::coordinate msg;
-        msg.X.data = coord.first;
-        msg.Y.data = coord.second;
+        msg.X = coord.first;
+        msg.Y = coord.second;
         pub_goTo.publish(msg);
 
         // set sent location to true

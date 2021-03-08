@@ -18,8 +18,8 @@ bool return_to_start::control_loop() {
     if (!sent_) {
         // get msg ready
         behaviors::coordinate msg;
-        msg.X.data = HOME_LOC.first;
-        msg.Y.data = HOME_LOC.second;
+        msg.X = HOME_LOC.first;
+        msg.Y = HOME_LOC.second;
 
         pub_goTo.publish(msg);
 
