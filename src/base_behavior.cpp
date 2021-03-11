@@ -50,7 +50,7 @@ void base_behavior::set_params(){}
 void base_behavior::nodelet_init(){}
 
 void base_behavior::parent_control_loop(){
-    bool success;
+    bool success = false;
     while(in_control_) {
         if(!success) {
             success = control_loop();
