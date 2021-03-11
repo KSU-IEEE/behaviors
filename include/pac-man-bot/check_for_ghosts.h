@@ -16,16 +16,11 @@ End statement:
 ==================================================
 CONNECTIONS
 subscribers: 
-    frontDist
-    backDist
-    leftDist
-    rightDist
-    heading
-    finishedMove
+    /arm/distance
 
 publishers:
     ghostLocation
-    goTo
+    /arm/scan
 **************************************************/
 
 // ros includes
@@ -34,10 +29,12 @@ publishers:
 #include <behaviors/coordinate.h>
 #include <std_msgs/Int8.h>
 #include <std_msgs/Bool.h> 
+#include <behaviors/polar_coordinate.h>
 
 // random includes
 #include <vector>
 #include <utility> // utility
+#include <cmath>
 
 namespace behaviors {
 namespace pac_man_behs {
@@ -52,36 +49,20 @@ public:
     void nodelet_init() override;
 
     // subs and cbs
-    ros::Subscriber sub_frontDist, sub_backDist, sub_leftDist, sub_rightDist;
-    ros::Subscriber subHeading,
-                    subFinishedMove;
-    void frontDist_cb(const behaviors::distances::ConstPtr& val);
-    void backDist_cb(const behaviors::distances::ConstPtr& val);
-    void leftDist_cb(const behaviors::distances::ConstPtr& val);
-    void rightDist_cb(const behaviors::distances::ConstPtr& val);
+    ros::Subscriber sub_armDistance;
 
-    void heading_cb(const std_msgs::Float64::ConstPtr& degree)
-        {heading_ = int(degree->data) % 360;} // keep it simple
-    void finishedMove_cb(const std_msgs::Bool::ConstPtr& yes)
-        {done_moving_ = yes->data;}
+    void armDistance_cb(const std_msgs::Float64::ConstPtr& dist);
 
-    ros::Publisher pubGhostLoc, pubGoTo;
+    ros::Publisher pub_scan, pub_ghostLoc;
 
-    // class specific
-    bool checkGhosts();
-    void sendMoveCmd();
+    void moveArm();
+    bool calcExistance(float dist);
     void sendGhostLoc();
     
 private:
     // end conditions
     bool ghost1_ = false;
     bool ghost2_ = false;
-
-    // distances
-    float front_dist_, back_dist_, left_dist_,
-          right_dist_;
-    int heading_;
-    bool done_moving_ = true;
 
     // params
     float ghost_dist_tol_;
@@ -90,7 +71,14 @@ private:
     // id is index
     // first is x, second is y
     std::vector<std::pair<float, float>> locs_;
-    int curr_target = -1;
+    int curr_target = 0;
+    
+    bool sent_loc = false;
+    float r_sent;
+    float armBaseLength;
+
+    // CONSTANTS
+    float START_X, START_Y;
 
 };  // check_for_ghosts
 } // pac_man_behs

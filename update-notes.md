@@ -37,9 +37,12 @@ Pubs:
     - the length of the physical arm
 - /arm/baseHeight
     - the height that the arm sits on the bot from the ground
-
-## check_for_ghosts:
-- update to just check for locations with the arm's distance sensor
+- /arm/baseLength
+    - the length of the bottom joint of the arm
+- starting_x
+    - the start position
+- starting_y
+    - the start position
 
 ## end:
 - it's perfoect
