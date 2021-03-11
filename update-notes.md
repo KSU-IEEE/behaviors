@@ -18,6 +18,16 @@ pubs:
     - prompted by arm/scan
     - holds the value read by the distance sensor on the arm in inches
 
+## Motor subs and pubs:
+subs:
+- /bot/move - std_msgs Float32 
+- /bot/turnLeft - std_msgs Bool
+- /bot/turnRight - std_msgs Bool
+- /bot/turn180 - std_msgs Bool
+
+Pubs:
+- /bot/doneMove = std_msgs Bool
+
 
 ## attack_ghosts:
 - Arm publishers and Subscribers

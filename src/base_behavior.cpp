@@ -52,14 +52,16 @@ void base_behavior::nodelet_init(){}
 void base_behavior::parent_control_loop(){
     bool success;
     while(in_control_) {
-        success = control_loop();
-        //cout<<"I'm in base behavior and success = control_loop is "<<success <<endl;
-        if(success) {
-            print_msg("giving up control");
-            behaviors::completed msg;
-            msg.yes = success;
-            msg.behavior = name_;
-            sm_pub.publish(msg);
+        if(!success) {
+            success = control_loop();
+            //cout<<"I'm in base behavior and success = control_loop is "<<success <<endl;
+            if(success) {
+                print_msg("giving up control");
+                behaviors::completed msg;
+                msg.yes = success;
+                msg.behavior = name_;
+                sm_pub.publish(msg);
+            }
         }
     }
 
