@@ -44,15 +44,30 @@ void attack_ghosts::armDone_cb(const std_msgs::Bool::ConstPtr& yes) {
 
     // update ghosts list 
     // go through ghosts and unset the top most
+    // send grabbed success
+    std_msgs::Int8 taken;
     if (yes->data) {
-             if (ghost1_) ghost1_ = false;
-        else if (ghost2_) ghost2_ = false;
-        else if (ghost3_) ghost3_ = false;
-        else if (ghost4_) ghost4_ = false;
-        else if (ghost5_) ghost5_ = false;
-
+        if (ghost1_){
+            ghost1_ = false;
+            taken.data = 1;
+        } else if (ghost2_) {
+            ghost2_ = false;
+            taken.data = 2;
+        } else if (ghost3_) {
+            ghost3_ = false;
+            taken.data = 3;
+        } else if (ghost4_) {
+            ghost4_ = false;
+            taken.data = 4;
+        } else if (ghost5_){
+            ghost5_ = false;
+            taken.data = 5;
+        }
         print_msg("Grabbed dat ghost");
+        pub_grabbedGhost.publish(taken);
     }
+
+    grabbing = false;
 }
 
 
@@ -63,6 +78,12 @@ void attack_ghosts::heading_cb(const std_msgs::Float64::ConstPtr& degree) {
 void attack_ghosts::finishedMove_cb(const std_msgs::Bool::ConstPtr& yes) {
     finished_move_ = yes->data;
 }
+
+void attack_ghosts::pose_cb(const behaviors::coordinate& loc) {
+    x = loc.X;
+    y = loc.Y;
+}
+
 
 // internal functions
 /*******************************************************************************/
@@ -98,7 +119,7 @@ bool attack_ghosts::move()  {
             msg.X = GHOST_LOC3.first - 3;
             msg.Y = GHOST_LOC3.second + distancePickUp_;
         } else if (ghost4_) {
-            msg.X = GHOST_LOC4.first; - 3;
+            msg.X = GHOST_LOC4.first - 3;
             msg.Y = GHOST_LOC4.second + distancePickUp_;
         } else {
             msg.X = GHOST_LOC5.first - distancePickUp_;
@@ -118,7 +139,52 @@ bool attack_ghosts::move()  {
 }
 
 bool attack_ghosts::grab()  {
-    // if (start_grabbing()) ;
+    if (start_grabbing) {
+        // calc angle 
+        float target_x, target_y;
+        if (ghost1_) {
+            target_x = GHOST_LOC1.first;
+            target_y = GHOST_LOC1.second;
+        } else if (ghost2_) {
+            target_x = GHOST_LOC2.first;
+            target_y = GHOST_LOC2.second;
+        } else if (ghost3_) {
+            target_x = GHOST_LOC3.first;
+            target_y = GHOST_LOC3.second;
+        } else if (ghost4_) {
+            target_x = GHOST_LOC4.first;
+            target_y = GHOST_LOC4.second;
+        } else {
+            target_x = GHOST_LOC5.first;
+            target_y = GHOST_LOC5.second;
+        }
+
+        float ang = atan(abs(target_y - y)/abs(target_x - x));
+        // qudrants 1 and 4
+        if (target_x > x ) {
+            if (target_y > y) {
+                // do nothing
+            } else {
+                // supplementary angle
+                ang = 90 + ang;
+            }
+        } else {
+            if (target_y > y) {
+                ang = 180 + (90 - ang);
+            } else {
+                ang = 270 + ang;
+            }
+        }
+
+        // send off angle
+        std_msgs::Float64 msg;
+        msg.data = ang;
+        pub_armGrabBlock.publish(msg);
+
+        // set control vars
+        start_grabbing = false;
+        grabbing = true;
+    }
     
     return false; //temp
 }
@@ -153,8 +219,8 @@ bool attack_ghosts::control_loop() {
 
 void attack_ghosts::set_params() {
     float armlength, armBase;
-    nh().getParam("arm/length", armlength);
-    nh().getParam("arm/baseHeight", armBase);
+    nh().getParam("/arm/length", armlength);
+    nh().getParam("/arm/baseHeight", armBase);
 
     distancePickUp_ = acos(armBase / armlength); // see oneNote
 }
@@ -164,13 +230,14 @@ void attack_ghosts::nodelet_init() {
     sub_ghostLoc = nh().subscribe("ghostLocation", 100, &attack_ghosts::ghostLoc_cb, this);
     sub_finishedMove = nh().subscribe("moveDone", 100, &attack_ghosts::finishedMove_cb, this); 
     sub_heading = nh().subscribe("heading", 100, &attack_ghosts::heading_cb, this);
-    sub_armDone = nh().subscribe("arm/done", 100, &attack_ghosts::armDone_cb, this);
+    sub_armDone = nh().subscribe("/arm/done", 100, &attack_ghosts::armDone_cb, this);
+    sub_pose = nh().subscribe("position", 100, &attack_ghosts::pose_cb, this);
 
     // init pubs
     pub_goTo = nh().advertise<behaviors::coordinate>("moveTo", 1000);
     pub_setHeading = nh().advertise<std_msgs::Float64>("setHeading", 1000);
-    pub_armGrabBlock = nh().advertise<std_msgs::Float64>("arm/grabBlock", 1000);
-
+    pub_armGrabBlock = nh().advertise<std_msgs::Float64>("/arm/grabBlock", 1000);
+    pub_grabbedGhost = nh().advertise<std_msgs::Int8> ("grabbedGhost", 100);
 }
 }// pac_man_behs
 }//  behaviors

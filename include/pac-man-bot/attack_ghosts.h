@@ -26,6 +26,7 @@ subscribers:
     heading
     finishedMove
     arm/grabBlock
+    position
 
 publishers: 
     goTo
@@ -60,14 +61,16 @@ public:
 
     // ros subscribers and cbs
     ros::Subscriber sub_ghostLoc, sub_finishedMove, 
-                    sub_heading, sub_armDone;
+                    sub_heading, sub_armDone, sub_pose;
     void ghostLoc_cb(const std_msgs::Int8::ConstPtr& loc);
     void heading_cb(const std_msgs::Float64::ConstPtr& degree);
     void finishedMove_cb(const std_msgs::Bool::ConstPtr& yes);
     void armDone_cb(const std_msgs::Bool::ConstPtr& yes);
+    void pose_cb(const behaviors::coordinate& loc);
 
     // ros pubs
-    ros::Publisher pub_goTo, pub_setHeading, pub_armGrabBlock;
+    ros::Publisher pub_goTo, pub_setHeading, pub_armGrabBlock,
+                   pub_grabbedGhost;
 
     // internal 
     bool stopwatch(int seconds);
@@ -77,6 +80,7 @@ private:
     // ros vars
     float heading_;
     bool finished_move_ = true;
+    float x, y;
 
     // end conditions
     bool ghosts_killed_, timer_;

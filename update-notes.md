@@ -28,12 +28,15 @@ subs:
 Pubs:
 - /bot/doneMove = std_msgs Bool
 
+## Random new Publishers added
+- grabbedGhost - std_msgs::Int8
+    - sent when a ghost is picked up, need to update a_star to sub to it
 
-## attack_ghosts:
-- Arm publishers and Subscribers
-- Update locations where it is safe to grab the ghosts 
-- read in armBaseHeight, sensorDist, and armLength
-- add remove_wall publisher
+## Random Params:
+- /arm/length
+    - the length of the physical arm
+- /arm/baseHeight
+    - the height that the arm sits on the bot from the ground
 
 ## check_for_ghosts:
 - update to just check for locations with the arm's distance sensor
