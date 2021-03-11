@@ -7,7 +7,7 @@ namespace behaviors {
 namespace pac_man_behs {
 // inits and deinits
 /*******************************************************************************/
-attack_ghosts::attack_ghosts() : base_behavior{"attach_ghosts"}{
+attack_ghosts::attack_ghosts() : base_behavior{"attack_ghosts"}{
 
 }
 
@@ -119,6 +119,8 @@ bool attack_ghosts::move()  {
 
 bool attack_ghosts::grab()  {
     // if (start_grabbing()) ;
+    
+    return false; //temp
 }
 
 // overrides
@@ -143,6 +145,9 @@ bool attack_ghosts::control_loop() {
 
     ghosts_killed_ = !ghost1_ && !ghost2_ && !ghost3_ && !ghost4_ && !ghost5_;
 
+    bool testing = timer_ || ghosts_killed_;
+
+    //cout<<"I'm inside attack_ghost, returning " << testing <<endl;
     return timer_ || ghosts_killed_;
 }
 
