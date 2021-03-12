@@ -73,7 +73,6 @@ public:
     ros::Publisher pub_goTo, pub_armScan, pub_armGrab;
 
     // fsm functions
-    virtual bool moveToStart();  // returns true when completed move
     virtual bool move();
     virtual bool search();       // returns true when finding a block
     virtual bool grabBlock();    // returns true when returned back to staritng position
@@ -83,12 +82,6 @@ public:
     bool doneMoving();
     behaviors::polar_coordinate calc_message();
     bool calcExistance(float dist);
-
-
-    // search functions
-    bool checkHeading(int head);
-    virtual bool next();
-    virtual bool check();
 private:
 // I want to reuse this for reach_search, so movign everything to protected
 

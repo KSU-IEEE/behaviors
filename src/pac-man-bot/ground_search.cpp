@@ -62,16 +62,6 @@ bool ground_search::calcExistance(float dist) {
     else return true;
 }
 
-bool ground_search::doneMoving() {
-    // if finished moving after sending loc, done moving
-    if (done_moving_ && sent_loc_) {
-        sent_loc_ = false;
-        done_moving_ = false;
-        return true;
-    }
-    return false;
-}
-
  behaviors::polar_coordinate ground_search::calc_message() {
      // based off of currentCheck
          // calc angle between locations
@@ -122,39 +112,6 @@ bool ground_search::doneMoving() {
  }
 
 
-// fsm high level functions
-bool ground_search::moveToStart() {
-    // set return param during this, so it won't quit after
-    // the first run
-    search_done_ = false;
-
-    if (!sent_loc_) {
-        // two different locations to go to based on target givin
-        std::pair<float, float> coord;  // x, y
-        switch(get_goal()) {
-            case 'F':
-                coord = LOCATION_F;
-                break;
-            case 'H':
-                coord = LOCATION_H;
-                break;
-            default: 
-                break;
-        }
-
-        // pack and send message
-        behaviors::coordinate msg;
-        msg.X = coord.first;
-        msg.Y = coord.second;
-        pub_goTo.publish(msg);
-
-        // set sent location to true
-        sent_loc_ = true;
-    }
-
-    return doneMoving();
-}
-
 bool ground_search::move() {
     // breakout if already sent loc
     if (sent_loc_) return false;
@@ -185,6 +142,7 @@ bool ground_search::move() {
     sent_loc_ = true;
     done_moving_ = false;
     search_done_ = false;
+    setInitialPoint = true;
 }
 
 // the meat of this guys
@@ -199,7 +157,7 @@ bool ground_search::search() {
     float boundx, boundy;
     if(doFirstBlock) {
         // first set initial
-        if (!setInitialPoint) {
+        if (setInitialPoint) {
             currentCheck.first = x - 5.5;
             currentCheck.second = y - armLength;
             initialCheck = currentCheck;
@@ -207,7 +165,7 @@ bool ground_search::search() {
         }
     } else {
         // first set initial
-        if (!setInitialPoint) {
+        if (setInitialPoint) {
             currentCheck.first = x - armLength;
             currentCheck.second = y - 5;
             initialCheck = currentCheck;
@@ -331,7 +289,7 @@ void ground_search::set_params() {
     nh().getParam("/arm/length", armLength);
     nh().getParam("/arm/baseHeight", baseHeight);
     nh().getParam("/arm/baseLength", armBaseLength);
-    
+
 
 }
 void ground_search::nodelet_init() {

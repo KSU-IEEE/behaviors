@@ -13,248 +13,170 @@ reach_search::~reach_search(){}
 
 // ros callbacks
 /**************************************************************/
-void reach_search::armDistance_cb(const std_msgs::Float64::ConstPtr& dist){
-    arm_dist_ = dist->data;
+
+
+// utilities
+/**************************************************************/
+std::pair<float, float> reach_search::calcBounds() {
+    // first handle A,B,C bc they have the same Ybounds
+    std::pair<float,float> returner;
+    if(get_goal() == 'A' || get_goal() == 'B' || get_goal() == 'C') {
+        returner.second = 47;  // y bound
+        // x bounds
+        if(get_goal() == 'A')
+            returner.first = left ? .5 : 17;
+        else if (get_goal() == 'B')
+            returner.first = left ? 42 : 52;
+        else 
+            returner.first = left ? 79 : 95;
+    } else {
+        returner.second = 26;  // y bound
+        // x bounds
+        if(get_goal() == 'D')
+            returner.first = left ? .5 : 23;
+        else 
+            returner.first = left ? 70 : 92;
+    }
+
+    return returner;
+}
+
+std::pair<float, float> reach_search::getInitial() {
+    float x, y;
+    switch(get_goal()) {
+        case 'A':
+            x = .5;
+            y = 40;
+            break;
+        case 'B':
+            x = 41.5;
+            y = 40;
+            break;
+        case 'C':
+            x = 66;
+            y = 40;
+            break;
+        case 'D':
+            x = .5;
+            y = 21.5;
+        case 'E':
+            x = 69; // nice
+            y = 21.5;
+    }
+
+    return std::make_pair(x, y);
 }
 
 // override - from ground_search
 /**************************************************************/
-// utils
-bool reach_search::doneWithSearch() {
-    // doneWithSearch is different for each different search box
-    switch (get_goal()) {
-    case 'A':
-        /* 
-            case:
-            at end of A and Arm is over last square of wall
-        */
-        return (curr_x_ >= LOCATION_A.first + 14 && 
-                arm_loc_.first == 18 &&
-                arm_loc_.second == 8);
-        break;
-    case 'B':
-        /*
-            case:
-            at end of B and Arm is over last square
-        */
-        return (curr_x_ >= LOCATION_B.first + 11 &&
-                arm_loc_.first == LOCATION_B.first + 11 &&
-                arm_loc_.second == 8);
-        break; 
-    case 'C':
-        return (curr_x_ >= LOCATION_C.first + 13 &&
-                arm_loc_.first == .5 &&
-                arm_loc_.second == .5);
-        break;
-    case 'D':
-        return (curr_x_ >= LOCATION_D.first + 19 &&
-                arm_loc_.first == LOCATION_D.first + 19 &&
-                arm_loc_.second == LOCATION_D.second - 4);
-        break;
-    case 'E':
-        return (curr_x_ >= LOCATION_E.first + 16 &&
-                arm_loc_.first == LOCATION_E.first + 19 &&
-                arm_loc_.second == LOCATION_E.second);
-        break;
-    default:
-        // return true: bad location, go to next state
-        return true;
-}
-}
-
-bool reach_search::initialArmPos() {
-    // again different position based on goal
-    return arm_done_moving_;
-}
-
-void reach_search::moveArm() {
-    // assumes arm & bot are done moving (see next())
-    // different lengths for ABC and DE
-    if (get_goal() == 'A' || get_goal() == 'B' || get_goal() == 'C') {
-        // is arm moving out or in?
-        if (search_outward_) { // moving out
-            // handle conversion with search_outward_ here,
-            // you want it at the beginning to be at the outward position twice
-            search_outward_ = curr_count_col_ >= LENGTH_OF_ABC ? false : true;
-
-            // get current target column distance, edge cases with the wall in the way
-            if (get_goal() == 'A' && num_with_wall_ < ROWS_TO_SEARCH_AT_WALL) {
-                if (curr_count_col_ >= LENGTH_OF_ABC) {
-                    num_with_wall_++;
-                    move_ = num_with_wall_ < ROWS_TO_SEARCH_AT_WALL;
-                }
-            } else if (get_goal() == 'C' && num_with_wall_ < ROWS_TO_SEARCH_AT_WALL) {
-                if (curr_count_col_ >= LENGTH_OF_ABC) {
-                    num_with_wall_++;
-                    move_ = false;
-                }
-            } else {
-                move_ = (curr_count_col_ >= LENGTH_OF_ABC);
-            }
-
-            // incrememnt column if necesarry 
-            curr_count_col_ = (curr_count_col_ <LENGTH_OF_ABC) ?
-                                curr_count_col_++ : curr_count_col_;
-
-        } else { // moving in 
-            // hand conversion with search_outward_ here
-            search_outward_ = curr_count_col_ <= .5 ? true : false;
-
-            // get current target column distance, edge cases with the wall in the way
-            if ((get_goal() == 'A' || get_goal() == 'C') && num_with_wall_ < ROWS_TO_SEARCH_AT_WALL) {
-                // combine A and C results are the same, move should always be false
-                move_ = false;
-                num_with_wall_ = curr_count_col_ >= 0.5 ? num_with_wall_ : num_with_wall_++;
-            } else {
-                move_ = (curr_count_col_ <= .5);
-            }
-
-            // decrement count if needed
-            curr_count_col_ = curr_count_col_ >= .5 ? 
-                              curr_count_col_-- : curr_count_col_;
-        }
-    } else {
-        if (search_outward_){
-            // hand search outward 
-            search_outward_ = curr_count_col_ >= LENGTH_OF_DE ? false : true;
-            // different edge case for D at the beginning
-            if (get_goal() == 'D' && num_with_wall_ < ROWS_TO_SEARCH_AT_WALL) {
-                if (curr_count_col_ >= LENGTH_OF_DE) {
-                    num_with_wall_++;
-                    move_ = num_with_wall_ < ROWS_TO_SEARCH_AT_WALL;
-                }
-            } else {
-                move_ = curr_count_col_ >= LENGTH_OF_DE;
-            }
-
-            // increment count
-            curr_count_col_ = curr_count_col_ < LENGTH_OF_DE ?
-                              curr_count_col_++ : curr_count_col_;
-        } else {
-            if (get_goal() == 'D' && num_with_wall_ < ROWS_TO_SEARCH_AT_WALL) {
-                move_ = false;
-                num_with_wall_ = curr_count_col_ >= 0.5 ? num_with_wall_ : num_with_wall_++;
-            } else {
-                move_ = curr_count_col_ <= .5;
-            }
-
-            // decrement if needed
-            curr_count_col_ = curr_count_col_ >= .5 ? 
-                              curr_count_col_-- : curr_count_col_;
-        }
-    }
-
-    // TODO: pack up arm message here
-}
-
-void reach_search::moveBot() {
-    if (move_) {
-        // pack up coordinate msg 
+bool reach_search::move() {
+    if (!sent_loc_ && !done_moving_) {
         behaviors::coordinate msg;
-        msg.X = curr_x_ + .5;
-        msg.Y = curr_y_;
-        pub_goTo.publish(msg);
-    }
-}
-
-bool reach_search::next() {
-    // edge cases: arm has to move and body has to move
-    // treat it differently for boxes ABC and DE
-    
-    // first should you be moving the arm or body?
-    // first is arm.....just so you know
-    // diffent again for every freaking target
-    if (initial_box_search_) {
-        // set the arm, wait for it to be done moving
-        initial_box_search_ = initialArmPos();
-        curr_count_col_ = 0;
-        move_ = false;
-        return false;
-    }
-
-    // normal situtation
-    // wait for arm to stop moving
-    if (!arm_done_moving_ && !done_moving_) {
-        return false;
-    } else {
-        // check which direction to put the arm
-        moveArm();
-        moveBot();
-    }
-
-}
-
-bool reach_search::check() {
-    search_done_ = doneWithSearch();
-
-    return arm_dist_ < arm_to_ground_ ? true : false;
-}
-
-// fsm funcs
-bool reach_search::moveToStart() {
-    // set search_done_ to false for next iteration
-    search_done_ = false;
-
-    // updated initial_box_search to true for next fms state
-    initial_box_search_ = true;
-
-    // 5 possible locations to be sent to - ABCDE
-    behaviors::coordinate msg;
-    if (!sent_loc_) {
-        switch(get_goal()){
-        case 'A':
-            msg.X = LOCATION_A.first;
-            msg.Y = LOCATION_A.second;
-            break;
-        case 'B':
-            msg.X = LOCATION_B.first;
-            msg.Y = LOCATION_B.second;
-            break;
-        case 'C':
-            msg.X = LOCATION_C.first;
-            msg.Y = LOCATION_C.second;
-            break;
-        case 'D':
-            msg.X = LOCATION_D.first;
-            msg.Y = LOCATION_D.second;
-            break;
-        case 'E':
-            msg.X = LOCATION_E.first;
-            msg.Y = LOCATION_E.second;
-            break;
-        default: break;
+        switch(get_goal()) {
+            case('A'):
+                msg.X = LOCATION_A.first;
+                msg.Y = LOCATION_A.second;
+                break;
+            case('B'):
+                msg.X = LOCATION_B.first;
+                msg.Y = LOCATION_B.second;
+                break;
+            case('C'):
+                msg.X = LOCATION_C.first;
+                msg.Y = LOCATION_C.second;
+                break;
+            case('D'):
+                msg.X = LOCATION_D.first;
+                msg.Y = LOCATION_D.second;
+                break;
+            case('E'):
+                msg.X = LOCATION_E.first;
+                msg.Y = LOCATION_E.second;
+                break;                                                                
         }
-        // send location
         pub_goTo.publish(msg);
 
-        // set for next iteration
         sent_loc_ = true;
+        done_moving_ = false;
+        search_done_ = false;
+        setInitialPoint = true;
     }
-
-    return doneMoving();
 }
 
 bool reach_search::search() {
-    if (! doneMoving() && !arm_done_moving_) {
-        return false;
+if(!arm_moving_){
+    if(setInitialPoint) {
+        initialCheck = getInitial();
+        currentCheck = initialCheck;
+    }
+    std::pair<float, float> bounds = calcBounds();
+
+    if (left) {
+        currentCheck.first--;
+        if (currentCheck.first <= bounds.first) {
+            currentCheck.first++;
+            currentCheck.second++;
+        }
+    } else {
+        currentCheck.first++;
+        if(currentCheck.first >= bounds.first) {
+            currentCheck.first--;
+            currentCheck.second++;
+        }
     }
 
-    next();
-    return check();
+    // check if y is in bounds, and quit if not
+    if (currentCheck.second > bounds.second) {
+        search_done_ = true;
+        return true;
+    }
+
+    // get angle
+    behaviors::polar_coordinate msg = calc_message();
+    pub_armScan.publish(msg);
+
+    arm_moving_=true;
+}
 }
 
 bool reach_search::grabBlock() {
- // todo
+    // first move
+    if(!sent_loc_ && !done_moving_) {
+        // directly below the block, an arm distance from it
+        behaviors::coordinate msg;
+        msg.X = currentCheck.first;
+        msg.Y = currentCheck.second - armLength;
+        pub_goTo.publish(msg);
+
+        sent_loc_ = true;
+        done_moving_ = false;
+    } else if(!arm_moving_){
+        // send arm command
+        behaviors::polar_coordinate temp = calc_message();
+        std_msgs::Float64 msg;
+        msg.data = temp.theta;
+
+        pub_armGrab.publish(msg);
+        arm_moving_ = true;
+        sent_loc_ = false;
+    }
 }
+
 
 // override functions - from base_behavior
 /**************************************************************/
 void reach_search::set_params() {
-    nh().getParam("/reach_search/targetArmDistance", arm_to_ground_);
+    ground_search::set_params();
 }
 
 void reach_search::nodelet_init() {
     ground_search::nodelet_init();
+    // update locs
+    LOCATION_A = {9, 39.5 - armLength};
+    LOCATION_B = {43.5, 39.5-armLength};
+    LOCATION_C = {78.5, 39.5-armLength};
+    LOCATION_E = {9, 21-armLength };
+    LOCATION_F = {78.5, 21-armLength};
 }
 }
 }

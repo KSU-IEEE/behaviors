@@ -54,12 +54,5 @@ Pubs:
 ## init:
 - TBD
 
-## reach_search:  
-- need to update everything with the arm
-    - add publishers and subscribers for arm (if not already added in ground_search)
-- update search algorithm
-    - don't need to move for it, the arm can pivot
-    - move before grabbing, have to add some logic to get the position correct
-
 ## return to start
 - add path to reset arm
