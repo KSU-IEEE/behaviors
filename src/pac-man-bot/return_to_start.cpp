@@ -25,6 +25,11 @@ bool return_to_start::control_loop() {
 
         sent_ = true;
         done_moving_ = false;
+
+        // send arm to reset
+        std_msgs::Bool arm_msg;
+        arm_msg.data = true;
+        pub_armReset.publish(arm_msg);
     }
 
     return sent_ && done_moving_;
@@ -38,6 +43,7 @@ void return_to_start::nodelet_init() {
     sub_finishedMove = nh().subscribe("moveDone" , 1000, &return_to_start::finishedMove_cb, this);
 
     pub_goTo = nh().advertise<behaviors::coordinate>("moveTo", 1000);
+    pub_armReset = nh().advertise<std_msgs::Bool>("/arm/reset", 1000);
 
 }
 
