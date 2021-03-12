@@ -119,15 +119,17 @@ void check_for_ghosts::moveArm() {
 
 bool check_for_ghosts::calcExistance(float dist) {
     // compare it to what was sent 
-    float diff = dist - r_sent;
-    if (diff < .5 && diff > -.5) return false;
+    // see the one note for this
+    float c_squared = r_sent*r_sent + baseHeight*baseHeight;
+    float calcedDist = sqrt(c_squared - (armLength * armLength));
+    float diff = abs(dist - calcedDist);
+    if (diff < ghost_dist_tol_) return false;
     else return true;
 }
 
 
 // base funcs 
 bool check_for_ghosts::control_loop(){
-
     // rethinking this
     if (!sent_loc) moveArm();
 
@@ -137,7 +139,11 @@ bool check_for_ghosts::control_loop(){
 void check_for_ghosts::set_params(){
     nh().getParam("starting_x", START_X);
     nh().getParam("starting_y", START_Y);
-    nh().getParam("arm/baseLength", armBaseLength);
+    nh().getParam("/arm/baseLength", armBaseLength);
+    nh().getParam("/arm/sensorDist", sensorDist);
+    nh().getParam("/arm/baseHeight", baseHeight);
+    nh().getParam("/arm/length", armLength);
+    nh().getParam("distanceTolerance", ghost_dist_tol_);
 }
 
 void check_for_ghosts::nodelet_init(){

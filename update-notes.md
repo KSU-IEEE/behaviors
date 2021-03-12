@@ -39,21 +39,20 @@ Pubs:
     - the height that the arm sits on the bot from the ground
 - /arm/baseLength
     - the length of the bottom joint of the arm
+- /arm/sensorDist
+    - the radius of the sensor on the arm
 - starting_x
     - the start position
 - starting_y
     - the start position
+- distanceTolerance
+    - the tolerance for checking the distances on the arm sensor
+- botWidth
+    - the width of thebot
 
-## end:
-- it's perfoect
-
-## ground_search:
-- Yeah just clean this up, need to consider initial search conditions
-- update safe locations
-- using arm for search? 
 
 ## init:
-- yeah this one is fine as well
+- TBD
 
 ## reach_search:  
 - need to update everything with the arm

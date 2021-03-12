@@ -21,40 +21,47 @@ ground_search::~ground_search() {
 
 // callbacks 
 /*************************************************************/
-void ground_search::heading_cb(const std_msgs::Float64::ConstPtr& degree) {
-    heading_ = degree->data;
-}
-
 void ground_search::finishedMove_cb(const std_msgs::Bool::ConstPtr& yes) {
     done_moving_ =  yes->data;
 }
 
-// distance callbacks. take the smaller of the two values
-void ground_search::frontDist_cb(const behaviors::distances::ConstPtr& val) {
-    front_dist_ = (val->left > val->right) ? val->right : val->left;
-}
-
-void ground_search::backDist_cb(const behaviors::distances::ConstPtr& val) {
-    back_dist_ = (val->left > val->right) ? val->right : val->left;
-}
-
-void ground_search::leftDist_cb(const behaviors::distances::ConstPtr& val) {
-    left_dist_ = (val->left > val->right) ? val->right : val->left;
-}
-
-void ground_search::rightDist_cb(const behaviors::distances::ConstPtr& val) {
-    right_dist_ = (val->left > val->right) ? val->right : val->left;
-}
-
 void ground_search::pos_cb(const behaviors::coordinate::ConstPtr& data) {
-    curr_x_ = data->X;
-    curr_y_ = data->Y;
+    // want the center of the body
+    curr_x_ = data->X + 3;
+    curr_y_ = data->Y + 3;
+}
+
+void ground_search::armDist_cb(const std_msgs::Float64::ConstPtr& val) {
+    if(in_control()){
+        bool ghost = calcExistance(val->data);
+        if (ghost) {
+            state = fsm::grabBlock;
+        }
+        arm_moving_ = false;
+    }
+}
+
+void ground_search::armDone_cb(const std_msgs::Bool::ConstPtr& yes) {
+    if (in_control() && state==fsm::grabBlock) {
+        state = fsm::search;
+    }
 }
 
 
 // internal funcs
 /*************************************************************/
 // utils
+
+bool ground_search::calcExistance(float dist) {
+    // compare it to what was sent 
+    // see the one note for this
+    float c_squared = r_sent*r_sent + baseHeight*baseHeight;
+    float calcedDist = sqrt(c_squared - (armLength * armLength));
+    float diff = abs(dist - calcedDist);
+    if (diff < ghost_dist_tol_) return false;
+    else return true;
+}
+
 bool ground_search::doneMoving() {
     // if finished moving after sending loc, done moving
     if (done_moving_ && sent_loc_) {
@@ -64,70 +71,56 @@ bool ground_search::doneMoving() {
     }
     return false;
 }
-// search functions
-bool ground_search::checkHeading(int head) {
-    // set heading first -- only send once
-    if (heading_ != head && ! waiting_for_head_) {
-        std_msgs::Float64 msg;
-        msg.data = 0;
-        pub_setHeading.publish(msg);
 
-        waiting_for_head_ = true;
-        return false;
-    }
-    
-    // check heading if needed
-    waiting_for_head_ = (waiting_for_head_ && (heading_ == 0)) ? 
-                        false : true;
-    return waiting_for_head_;
-}
+ behaviors::polar_coordinate ground_search::calc_message() {
+     // based off of currentCheck
+         // calc angle between locations
+    // have to send in reguard to the distance from the outside of the bot
+    // so distance from starting point
+    float target_x = currentCheck.first;
+    float target_y = currentCheck.second;
 
-bool ground_search::next() {
-    if (!sent_loc_) {
-        // make target and send
-        behaviors::coordinate msg;
-        msg.X = curr_x_;
-        msg.Y = curr_y_ - .5;
-        pub_goTo.publish(msg);
+    float START_X = curr_x_;
+    float START_Y = curr_y_;
 
-        sent_loc_ = true;
-    }
+    float x = abs(target_x - START_X);
+    float y = abs(target_y - START_Y);
+    float ang = atan(y/x);
+    // qudrants 1 and 4
 
-    return doneMoving();
-}
-
-bool ground_search::check() {
-    // clear ready to check for next iteration
-    ready_to_check_ = false;
-
-    // check in front of the first iteration
-    if (!checked_ahead_) {
-        if (back_dist_ <= 12.7)
-            return true;
-        else {
-            checked_ahead_ = true;
-            return false;
+    if (target_x > START_X ) {
+        if (target_y > START_Y) {
+            // do nothing
+        } else {
+            // supplementary angle
+            ang = 90 + ang;
+        }
+    } else {
+        if (target_y > START_Y) {
+            ang = 180 + (90 - ang);
+        } else {
+            ang = 270 + ang;
         }
     }
 
-    // check different sides depending on target
-    // max distance of 10"
-    switch(get_goal()) {
-        case 'F':
-            // check right side. give some tolerance
-            if (right_dist_ <= 9.7){
-                
-                return true;
-            }
-            break;
-        case 'H':
-            if (left_dist_ <= 9.7){
-                return true;
-            }
-            break;
-    }
-    return false;
-}
+    // get distance
+    float a = abs(target_x - x);
+    float b = abs(target_y - y);
+    float distance = sqrt(a*a + b*b); // hit pathagorean theorem
+
+    // need to subtract distance from center
+    distance = distance - armBaseLength;
+
+    r_sent = distance;
+
+    // send out coordinate
+    behaviors::polar_coordinate msg;
+    msg.theta = ang;
+    msg.r = distance;
+
+    return msg;
+ }
+
 
 // fsm high level functions
 bool ground_search::moveToStart() {
@@ -162,85 +155,201 @@ bool ground_search::moveToStart() {
     return doneMoving();
 }
 
-bool ground_search::search() {
-    // check if heading is 0
-    if (!checkHeading(TARGET_HEADING)) return false;
+bool ground_search::move() {
+    // breakout if already sent loc
+    if (sent_loc_) return false;
 
-    // heading is correct, now start search
-    // do a series of small searches every .5 inches
-    // every row should be the next .5 inch below, no matter
-    // current target
-    bool returner;
-    if (!ready_to_check_) {
-        ready_to_check_ = next();  // send message to move or wait until moved
-        return false;
+    // grab target
+    behaviors::coordinate loc;
+    if (doFirstBlock) {
+        if (get_goal() == 'F') {
+            loc.X = LOCATION_FS.first;
+            loc.Y = LOCATION_FS.second;
+        } else {
+            loc.X = LOCATION_HS.first;
+            loc.Y = LOCATION_HS.second;
+        }
     } else {
-        returner = check();
+        if (get_goal() == 'F') {
+            loc.X = LOCATION_F.first;
+            loc.Y = LOCATION_F.second;
+        } else {
+            loc.X = LOCATION_H.first;
+            loc.Y = LOCATION_H.second;
+        }
     }
 
-    // check if done with pattern
-    if (curr_y_ > 42.5 && !returner) search_done_ = true;
+    // send location 
+    pub_goTo.publish(loc);
 
-    return returner;
+    sent_loc_ = true;
+    done_moving_ = false;
+    search_done_ = false;
 }
+
+// the meat of this guys
+bool ground_search::search() {
+    // treat each chunk differently
+    // for first chunk, it's a 12 inch x 10 inch chunk
+    // that starts one arm length away from the start point
+    if(!arm_moving_){
+    float x = curr_x_;
+    float y = curr_y_;
+
+    float boundx, boundy;
+    if(doFirstBlock) {
+        // first set initial
+        if (!setInitialPoint) {
+            currentCheck.first = x - 5.5;
+            currentCheck.second = y - armLength;
+            initialCheck = currentCheck;
+            setInitialPoint = false;
+        }
+    } else {
+        // first set initial
+        if (!setInitialPoint) {
+            currentCheck.first = x - armLength;
+            currentCheck.second = y - 5;
+            initialCheck = currentCheck;
+            setInitialPoint = false;
+        }
+    }
+    boundy = initialCheck.second - 9.5; // round down
+    if (left) {
+        boundx = initialCheck.first;
+        currentCheck.first -= 1;
+
+        if (currentCheck.first < boundx) {
+            left = false;
+            currentCheck.first += 1;
+            currentCheck.second -= 1;
+        }
+    } else {
+        boundx = initialCheck.first + 11.5;
+        currentCheck.first += 1;
+
+        if (currentCheck.first > boundx) {
+            left = true;
+            currentCheck.first -= 1;
+            currentCheck.second -= 1;
+        }
+    }
+
+    // check y bounds
+    if(currentCheck.second < boundy) { // this block is done
+        // continue to next block if first done
+        if (doFirstBlock) {
+            doFirstBlock = false;
+            move_ = true;
+        } else {
+            doFirstBlock = true;
+            search_done_ = true;
+        }
+        return true;
+    }
+
+    // if still in bounds, send next check
+    behaviors::polar_coordinate msg = calc_message();
+    pub_armScan.publish(msg);
+
+    // wait to do anything else until you check distance 
+    arm_moving_ = true;
+    }
+}
+
+
 bool ground_search::grabBlock() {
-    // two conditions. initial block check when check_ahead_ == false
-    // and normal to the side
+    // move to correct distance
+    if (!sent_loc_ && !done_moving_) {
+        // different for the block you are checking
+
+        behaviors::coordinate msg;
+        if (doFirstBlock) {
+            msg.X = (get_goal() == 'F') ? 6.5 : 87.5;
+            msg.Y = currentCheck.second + armLength;
+        } else {
+            msg.X = (get_goal() == 'F') ? currentCheck.first - armLength : currentCheck.first + armLength;
+            msg.Y = 5.5;
+        } 
+
+        pub_goTo.publish(msg);
+        sent_loc_ = true;
+    } else if (!arm_moving_) {
+        // send grab messaage
+        // calc angle
+        behaviors::polar_coordinate temp = calc_message();
+        std_msgs::Float64 msg;
+        msg.data = temp.theta;
+        pub_armGrab.publish(msg);
+        arm_moving_ = true;
+    }
+}
+
+bool ground_search::checkTransition() {
+    switch(state){
+        case (fsm::moving):
+            // determine to transition
+            if (sent_loc_ && done_moving_) {
+                state = fsm::search;
+                sent_loc_ = false;
+                done_moving_ = false;
+            }
+            break;
+        case (fsm::search):
+            // need to handle moving to the second location
+            if (move_ || search_done_){
+                state = fsm::moving;
+            }
+            break;
+        case (fsm::grabBlock):
+            // handles transition automatically
+            break;
+    }
 }
 
 // override funcs
 /*************************************************************/
 bool ground_search::control_loop() {
-    bool transition;
-    // internal fsm 
-    // go to state, and handle transitions
-    switch(state){
-        case fsm::moveToStart:
-            transition = moveToStart();
-            if (transition){
-                state = fsm::search;
-                print_msg("Reached top of box, switching to search");
-            } 
+    switch(state) {
+        case (fsm::moving):
+            move();
             break;
-        case fsm::search:
-            transition = search();
-            if (transition && !search_done_) {
-                state = fsm::grabBlock;
-                print_msg("Found block, switching to grabBlock");
-            } else if (transition && search_done_) {
-                // return fsm to moveToStart for next iteration
-                state = fsm::moveToStart;
-                print_msg("Search complete, giving up control");
-            }
+        case (fsm::search):
+            search();
             break;
-        case fsm::grabBlock:
-            transition = grabBlock();
-            if (transition) {
-                state = fsm::search;
-                print_msg("Returned to track, continueing search");
-            }
-        default:
+        case (fsm::grabBlock):
+            grabBlock();
             break;
     }
 
-    return search_done_;
+    checkTransition();  // udpate fsm
+
+    return search_done_;  // set in search
 }
 void ground_search::set_params() {
-    // tbd
+    nh().getParam("botWidth", botWidth);
+    nh().getParam("/arm/length", armLength);
+    nh().getParam("/arm/baseHeight", baseHeight);
+    nh().getParam("/arm/baseLength", armBaseLength);
+    
+
 }
 void ground_search::nodelet_init() {
     // init subs 
     sub_finishedMove = nh().subscribe("moveDone" , 1000, &ground_search::finishedMove_cb, this);
-    sub_heading      = nh().subscribe("heading"  , 1000, &ground_search::heading_cb     , this);
-    sub_frontDist = nh().subscribe("sensors/front", 100, &ground_search::frontDist_cb, this);
-    sub_backDist = nh().subscribe("sensors/back", 100, &ground_search::backDist_cb, this);
-    sub_leftDist = nh().subscribe("sensors/left", 100, &ground_search::leftDist_cb, this);
-    sub_rightDist = nh ().subscribe("sensors/right", 100, &ground_search::rightDist_cb, this);
     sub_posiiton     = nh().subscribe("pose"     , 1000, &ground_search::pos_cb         , this);
+    sub_armDist = nh().subscribe("/arm/distance", 1000, &ground_search::armDist_cb, this);
+    sub_armDon = nh().subscribe("/arm/done", 1000, &ground_search::armDone_cb, this);
 
     // init pubs
     pub_goTo = nh().advertise<behaviors::coordinate>("moveTo", 1000);
-    pub_setHeading = nh().advertise<std_msgs::Float64>("setHeading", 1000);
+    pub_armScan = nh().advertise<behaviors::polar_coordinate>("/arm/scan", 1000);
+    pub_armGrab = nh().advertise<std_msgs::Float64>("/arm/grabBlock", 1000);
+
+    LOCATION_FS = { 3 , 10.5 + armLength};
+    LOCATION_F = {12.5 - armLength, 2};
+    LOCATION_HS = { 84.5 , 10.5 + armLength};
+    LOCATION_H = {81.5 + armLength, 2};
 }
 } // pac_man_behs
 } // behaviors

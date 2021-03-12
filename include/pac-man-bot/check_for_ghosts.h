@@ -66,6 +66,7 @@ private:
 
     // params
     float ghost_dist_tol_;
+    float sensorDist, baseHeight, armLength;
 
     // list of posible ghost locations
     // id is index

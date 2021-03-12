@@ -25,16 +25,14 @@ Set when the search state in the fsm finishes
 CONNECTIONS
 subscribers:
     finishedMove
-    heading
-    frontDist
-    backDist
-    leftDist
-    rightDist
     position
+    /arm/done
+    /arm/distance
 
 publishers: 
     goTo
-    setHeading
+    /arm/scan
+    /arm/grabBlock
 
 *NOTE* will need to add arm topics here later
 **************************************************/
@@ -43,6 +41,7 @@ publishers:
 #include <std_msgs/Float64.h>
 #include <behaviors/distances.h>
 #include <behaviors/coordinate.h>
+#include <behaviors/polar_coordinate.h>
 
 // random includes
 #include <utility> // std::pair
@@ -50,7 +49,7 @@ publishers:
 namespace behaviors {
 namespace pac_man_behs {
 // define state machine
-enum fsm {moveToStart, search, grabBlock};
+enum fsm {moving, search, grabBlock};
 
 class ground_search : public base_behavior {
 public:
@@ -64,28 +63,27 @@ public:
     void nodelet_init() override;
 
     // subsribers and cbs
-    ros::Subscriber sub_frontDist, sub_backDist, sub_leftDist, sub_rightDist;
-    ros::Subscriber sub_finishedMove, sub_heading,
-                    sub_posiiton;
+    ros::Subscriber sub_finishedMove, sub_posiiton, sub_armDist, sub_armDon;
     void finishedMove_cb(const std_msgs::Bool::ConstPtr& yes);
-    void heading_cb(const std_msgs::Float64::ConstPtr& degree);
-    void frontDist_cb(const behaviors::distances::ConstPtr& val);
-    void backDist_cb(const behaviors::distances::ConstPtr& val);
-    void leftDist_cb(const behaviors::distances::ConstPtr& val);
-    void rightDist_cb(const behaviors::distances::ConstPtr& val);
     void pos_cb(const behaviors::coordinate::ConstPtr& data);
-
+    void armDist_cb(const std_msgs::Float64::ConstPtr& val);
+    void armDone_cb(const std_msgs::Bool::ConstPtr& yes);
 
     // publishers 
-    ros::Publisher pub_goTo, pub_setHeading;
+    ros::Publisher pub_goTo, pub_armScan, pub_armGrab;
 
     // fsm functions
     virtual bool moveToStart();  // returns true when completed move
+    virtual bool move();
     virtual bool search();       // returns true when finding a block
     virtual bool grabBlock();    // returns true when returned back to staritng position
+    virtual bool checkTransition();
 
     // internal funcs
     bool doneMoving();
+    behaviors::polar_coordinate calc_message();
+    bool calcExistance(float dist);
+
 
     // search functions
     bool checkHeading(int head);
@@ -101,25 +99,40 @@ protected:
     // call back vars
     bool done_moving_ = false;
     bool arm_done_moving_ = false;
-    int heading_;
     float curr_x_, curr_y_;
-    float front_dist_, back_dist_, left_dist_, right_dist_;
+    float botWidth = 3;
 
     // state machine
     fsm state; // -- see below
 
     // internal vars
-    float return_to_x_, return_to_y_;
     float target_x_, target_y_;
     float sent_loc_ = false;
     bool waiting_for_head_ = false;
     bool ready_to_check_ = true;
     bool checked_ahead_ = false;
+    bool setInitialPoint = false;
+    bool blockChecked = false;
+    bool move_;
+    bool arm_moving_ = false;
+
+    // arm vars
+    float armLength, armBaseLength, r_sent;
+    float baseHeight, ghost_dist_tol_;
+
+    std::pair<float, float> currentCheck;
+    std::pair<float, float> initialCheck;
+    bool left = false; // when true, the x values decrease by 1, otherwise they incse by one
+
+    // two chunks of each block
+    bool doFirstBlock = true; // when true, do first search patter
+                              // when false, do second
 
     // constants -- in form x,y
-    const std::pair<float, float> LOCATION_F = {4, 34.5};
-    const std::pair<float, float> LOCATION_H = {78.5, 34.5};
-    const int TARGET_HEADING = 0;
+    std::pair<float, float> LOCATION_FS = {4, 34.5}; // starting f
+    std::pair<float, float> LOCATION_F =  {4, 34.5}; // second f loc
+    std::pair<float, float> LOCATION_HS = {78.5, 34.5};  // starting h
+    std::pair<float, float> LOCATION_H = {78.5, 34.5};   // second H
 };  // ground_search
 
 } // pac_man_behs
