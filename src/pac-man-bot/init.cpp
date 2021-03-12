@@ -32,7 +32,7 @@ void init::startSignal_cb(const std_msgs::Bool::ConstPtr& start) {
 }
 
 void init::ppLoc_cb (const std_msgs::Char::ConstPtr& loc) {
-    power_loc_ = (loc->data == 'A' or loc->data == 'C') ? true : false;
+    power_loc_ = (loc->data == 'A' || loc->data == 'C') ? true : false;
 
     print_msg("Received loc: " + loc->data);
 }
