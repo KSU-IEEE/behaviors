@@ -3,6 +3,7 @@ project(behaviors)
 
 # any dependencies here
 find_package(catkin REQUIRED COMPONENTS
+  roscpp
   message_generation
   std_msgs
   roslaunch
@@ -33,11 +34,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   # DIRECTORY msg
-#    FILES
-# )
+# Generate messages in the 'msg' folder
+add_message_files(
+  DIRECTORY msg
+  #  FILES target.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -52,11 +53,11 @@ find_package(catkin REQUIRED COMPONENTS
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#    DEPENDENCIES
-#    std_msgs sensor_msgs # Or other packages containing msgs
-# )
+# Generate added messages and services with any dependencies listed here
+generate_messages(
+   DEPENDENCIES
+   std_msgs  # Or other packages containing msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -68,9 +69,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include include/pac-man-bot
   LIBRARIES behaviors
-  CATKIN_DEPENDS roscpp
+  CATKIN_DEPENDS message_runtime
 )
 
 ###################################
@@ -83,13 +84,22 @@ roslaunch_add_file_check(launch/test_behaviors.launch)
 ###################################
 include_directories(
     include
+    include/pac-man-bot
+    include/test
     ${catkin_INCLUDE_DIRS}
 )
 
 set(SRCS 
   src/base_behavior.cpp
-  src/test_behavior1.cpp
-  src/test_behavior2.cpp
+  src/test/test_behavior1.cpp
+  src/test/test_behavior2.cpp
+  src/pac-man-bot/attack_ghosts.cpp
+  src/pac-man-bot/init.cpp
+  src/pac-man-bot/check_for_ghosts.cpp
+  src/pac-man-bot/ground_search.cpp
+  src/pac-man-bot/reach_search.cpp
+  src/pac-man-bot/end.cpp
+  src/pac-man-bot/return_to_start.cpp
 )
 
 if ( NOT ("${SRCS}" STREQUAL "") )
@@ -100,7 +110,12 @@ if ( NOT ("${SRCS}" STREQUAL "") )
   add_library(behaviors ${SRCS})
   target_link_libraries(behaviors 
       PUBLIC
-      ${LIBS})
+      ${LIBS}
+      )
+
+      add_dependencies(behaviors ${behaviors_EXPORTED_TARGETS})
+
+  add_dependencies(behaviors ${catkin_EXPORTED_TARGETS})
 
   #update master CMakeLists.txt
   list(APPEND COMPILATION_TARGETS behaviors)

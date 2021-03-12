@@ -1,0 +1,52 @@
+<launch>
+<node   pkg="nodelet"
+        type="nodelet" name="init"
+        args="standalone behaviors/pac-man-bot/init"
+        respawn="true" output="screen">
+    <!-- put args here -->
+</node>
+
+<node   pkg="nodelet"
+        type="nodelet" name="check_for_ghosts"
+        args="standalone behaviors/pac-man-bot/check_for_ghosts"
+        respawn="true" output="screen"> 
+    <!-- put args here -->
+</node>
+
+<node   pkg="nodelet"
+        type="nodelet" name="ground_search"
+        args="standalone behaviors/pac-man-bot/ground_search"
+        respawn="true" output="screen">
+    <!-- put args here -->
+</node>
+
+<node   pkg="nodelet"
+        type="nodelet" name="reach_search"
+        args="standalone behaviors/pac-man-bot/reach_search"
+        respawn="true" output="screen">
+    <!-- put args here -->
+    <param name="/reach_search/targetArmDistance" type="double" value="2.5" />
+</node>
+
+<node   pkg="nodelet"
+        type="nodelet" name="attack_ghosts"
+        args="standalone behaviors/pac-man-bot/attack_ghosts"
+        respawn="true" output="screen">
+    <!-- put args here -->
+</node>
+
+<node   pkg="nodelet"
+        type="nodelet" name="return_to_start"
+        args="standalone behaviors/pac-man-bot/return_to_start"
+        respawn="true" output="screen">
+    <!-- put args here -->
+</node>
+
+<node   pkg="nodelet"
+        type="nodelet" name="end"
+        args="standalone behaviors/pac-man-bot/end_beh"
+        respawn="true" output="screen">
+    <!-- put args here -->
+</node>
+
+</launch>

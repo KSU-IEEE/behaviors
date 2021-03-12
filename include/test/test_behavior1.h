@@ -1,7 +1,7 @@
 #ifndef TEST_BEHAVIOR_H
 #define TEST_BEHAVIOR_H 
 
-#include "behaviors/base_behavior.h"
+#include "base_behavior.h"
 
 // ros message includes
 #include <std_msgs/String.h>
