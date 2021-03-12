@@ -49,6 +49,8 @@ Pubs:
     - the tolerance for checking the distances on the arm sensor
 - botWidth
     - the width of thebot
+- startingHeading
+    
 
 
 ## init:

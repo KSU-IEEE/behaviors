@@ -37,7 +37,7 @@ public:
     void finishedMove_cb(const std_msgs::Bool::ConstPtr& yes) {done_moving_ = yes->data;}
 
     // publisher 
-    ros::Publisher pub_goTo, armReset;
+    ros::Publisher pub_goTo, pub_armReset;
 private:
     // return statements
     bool done_moving_ = false;
