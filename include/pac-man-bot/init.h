@@ -60,7 +60,7 @@ public:
 
 private:
     // end conditions
-    bool begin_;
+    bool begin_ = false;
     bool power_loc_;
     bool time_out_;  
 

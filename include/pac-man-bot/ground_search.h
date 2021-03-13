@@ -70,7 +70,7 @@ public:
     void armDone_cb(const std_msgs::Bool::ConstPtr& yes);
 
     // publishers 
-    ros::Publisher pub_goTo, pub_armScan, pub_armGrab;
+    ros::Publisher pub_goTo, pub_armScan, pub_armGrab, pub_armDrop;
 
     // fsm functions
     virtual bool move();

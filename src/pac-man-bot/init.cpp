@@ -26,7 +26,7 @@ void init::startSignal_cb(const std_msgs::Bool::ConstPtr& start) {
         pubStartListen.publish(msg);
 
         start_time_ = std::chrono::system_clock::now();
-
+        print_msg("time at" + to_string(start_time_.time_since_epoch().count()));
         print_msg("Starting Timer");
     }
 }
@@ -39,16 +39,20 @@ void init::ppLoc_cb (const std_msgs::Char::ConstPtr& loc) {
 
 // timer function
 bool init::stopwatch(int seconds) {
-    std::chrono::duration<float> diff = 
-        std::chrono::system_clock::now() - start_time_;
+    std::chrono::time_point<std::chrono::system_clock> nowish = std::chrono::system_clock::now();
 
+    float diff = 
+        chrono::duration_cast<chrono::milliseconds>(nowish - start_time_).count() / 1000;
+
+    // print_msg(to_string(nowish.time_since_epoch().count()) + " and " +to_string(start_time_.time_since_epoch().count()) );
+    // print_msg(to_string(diff));
     // send status
-    int secs = int(floor(diff.count()));
+    int secs = int(floor(diff));
     if (secs % 5 == 0 && secs != last_msg_) {
         print_msg("has waited for " + std::to_string(secs) + " seconds");
         last_msg_ = secs;
     }
-    return diff.count() >= seconds;
+    return diff >= seconds;
 }
 
 bool init::control_loop() {
